@@ -4,17 +4,179 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Hub - Collaborate & Study</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #EBF4FF 0%, #E0E7FF 100%);
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .card { background: white; border-radius: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 2rem; }
+        .card:hover { box-shadow: 0 10px 20px rgba(0,0,0,0.15); transition: 0.3s; }
+        .btn { 
+            padding: 0.75rem 1.5rem; 
+            border: none; 
+            border-radius: 0.5rem; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: 0.2s;
+            font-size: 1rem;
+        }
+        .btn-primary { background: #4F46E5; color: white; }
+        .btn-primary:hover { background: #4338CA; }
+        .btn-secondary { background: #F3F4F6; color: #374151; }
+        .btn-secondary:hover { background: #E5E7EB; }
+        .input { 
+            width: 100%; 
+            padding: 0.75rem 1rem; 
+            border: 1px solid #D1D5DB; 
+            border-radius: 0.5rem; 
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        .input:focus { outline: none; border-color: #4F46E5; box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
+        .sidebar { 
+            width: 16rem; 
+            background: white; 
+            border-right: 1px solid #E5E7EB; 
+            height: 100vh; 
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+        }
+        .main-content { margin-left: 16rem; padding: 2rem; min-height: 100vh; }
+        .tab-btn { 
+            width: 100%; 
+            text-align: left; 
+            padding: 0.75rem 1rem; 
+            border: none; 
+            background: transparent; 
+            cursor: pointer; 
+            border-radius: 0.5rem; 
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .tab-btn:hover { background: #F3F4F6; }
+        .tab-btn.active { background: #EEF2FF; color: #4F46E5; font-weight: 600; }
+        .modal { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            bottom: 0; 
+            background: rgba(0,0,0,0.5); 
+            display: none; 
+            align-items: center; 
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal.show { display: flex; }
+        .modal-content { 
+            background: white; 
+            border-radius: 1rem; 
+            padding: 2rem; 
+            max-width: 28rem; 
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .grid { display: grid; gap: 1rem; }
+        .grid-2 { grid-template-columns: repeat(2, 1fr); }
+        .grid-3 { grid-template-columns: repeat(3, 1fr); }
+        .flex { display: flex; }
+        .flex-between { justify-content: space-between; }
+        .flex-center { align-items: center; justify-content: center; }
+        .gap-1 { gap: 0.5rem; }
+        .gap-2 { gap: 1rem; }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .mb-4 { margin-bottom: 2rem; }
+        .mt-1 { margin-top: 0.5rem; }
+        .mt-2 { margin-top: 1rem; }
+        .p-1 { padding: 0.5rem; }
+        .p-2 { padding: 1rem; }
+        .text-center { text-align: center; }
+        .text-sm { font-size: 0.875rem; }
+        .text-lg { font-size: 1.125rem; }
+        .text-xl { font-size: 1.25rem; }
+        .text-2xl { font-size: 1.5rem; }
+        .text-3xl { font-size: 1.875rem; }
+        .font-bold { font-weight: 700; }
+        .font-semibold { font-weight: 600; }
+        .text-gray-600 { color: #4B5563; }
+        .text-gray-800 { color: #1F2937; }
+        .text-indigo-600 { color: #4F46E5; }
+        .bg-indigo-600 { background: #4F46E5; }
+        .bg-indigo-50 { background: #EEF2FF; }
+        .bg-indigo-100 { background: #E0E7FF; }
+        .rounded-full { border-radius: 9999px; }
+        .badge { 
+            display: inline-block; 
+            padding: 0.25rem 0.75rem; 
+            background: #E0E7FF; 
+            color: #4338CA; 
+            border-radius: 9999px; 
+            font-size: 0.875rem;
+        }
+        .avatar { 
+            width: 2.5rem; 
+            height: 2.5rem; 
+            border-radius: 50%; 
+            background: #4F46E5; 
+            color: white; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .icon-circle { 
+            width: 4rem; 
+            height: 4rem; 
+            background: #4F46E5; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: white; 
+            font-size: 2rem;
+            margin: 0 auto 1rem;
+        }
+        .border-dashed { 
+            border: 2px dashed #C7D2FE; 
+        }
+        .border-dashed:hover { border-color: #818CF8; }
+        h1 { font-size: 1.875rem; font-weight: 700; color: #1F2937; margin-bottom: 1.5rem; }
+        h2 { font-size: 1.25rem; font-weight: 600; color: #1F2937; margin-bottom: 1rem; }
+        h3 { font-size: 1.125rem; font-weight: 600; color: #1F2937; }
+        textarea { resize: vertical; min-height: 100px; }
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; height: auto; position: relative; }
+            .main-content { margin-left: 0; }
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+        }
+    </style>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    </style>
 </head>
 <body>
-    <div id="app"></div>
+    <div id="app">
+        <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+            <div class="card text-center">
+                <div style="width: 3rem; height: 3rem; border: 4px solid #4F46E5; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
+                <p class="text-gray-600">Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
 
     <script>
         let auth, db;
@@ -71,11 +233,11 @@
 
         function showError(message) {
             document.getElementById('app').innerHTML = 
-                '<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">' +
-                '<div class="bg-white rounded-2xl shadow-xl p-8 max-w-md text-center">' +
-                '<h2 class="text-2xl font-bold text-red-600 mb-4">Error</h2>' +
-                '<p class="text-gray-600 mb-4">' + message + '</p>' +
-                '<button onclick="location.reload()" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Refresh</button>' +
+                '<div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem;">' +
+                '<div class="card text-center" style="max-width: 28rem;">' +
+                '<h2 style="color: #DC2626; margin-bottom: 1rem;">Error</h2>' +
+                '<p class="text-gray-600 mb-2">' + message + '</p>' +
+                '<button onclick="location.reload()" class="btn btn-primary mt-2">Refresh</button>' +
                 '</div></div>';
         }
 
@@ -262,172 +424,147 @@
         }
 
         function renderLogin() {
-            return '<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">' +
-                '<div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">' +
-                '<div class="text-center mb-8">' +
-                '<div class="bg-indigo-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">' +
-                '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">' +
-                '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>' +
-                '<path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>' +
-                '</svg></div>' +
-                '<h1 class="text-3xl font-bold text-gray-800">Student Hub</h1>' +
-                '<p class="text-gray-600 mt-2">Collaborate, study, and succeed together</p>' +
+            return '<div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem;">' +
+                '<div class="card" style="max-width: 28rem; width: 100%;">' +
+                '<div class="text-center mb-4">' +
+                '<div class="icon-circle">📚</div>' +
+                '<h1 style="margin-bottom: 0.5rem;">Student Hub</h1>' +
+                '<p class="text-gray-600">Collaborate, study, and succeed together</p>' +
                 '</div>' +
-                '<div class="flex gap-2 mb-6">' +
-                '<button onclick="showLogin()" id="login-tab" class="flex-1 py-2 rounded-lg font-medium transition bg-indigo-600 text-white">Login</button>' +
-                '<button onclick="showSignup()" id="signup-tab" class="flex-1 py-2 rounded-lg font-medium transition bg-gray-100 text-gray-600">Sign Up</button>' +
+                '<div class="flex gap-1 mb-2">' +
+                '<button onclick="showLogin()" id="login-tab" class="btn btn-primary" style="flex: 1;">Login</button>' +
+                '<button onclick="showSignup()" id="signup-tab" class="btn btn-secondary" style="flex: 1;">Sign Up</button>' +
                 '</div>' +
-                '<div id="login-form" class="space-y-4">' +
-                '<input type="email" id="login-email" placeholder="Email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent">' +
-                '<input type="password" id="login-password" placeholder="Password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent">' +
-                '<button onclick="submitLogin()" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition">Login</button>' +
+                '<div id="login-form">' +
+                '<input type="email" id="login-email" placeholder="Email" class="input">' +
+                '<input type="password" id="login-password" placeholder="Password" class="input">' +
+                '<button onclick="submitLogin()" class="btn btn-primary" style="width: 100%;">Login</button>' +
                 '</div>' +
-                '<div id="signup-form" class="space-y-4" style="display:none;">' +
-                '<input type="text" id="signup-name" placeholder="Full Name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent">' +
-                '<input type="email" id="signup-email" placeholder="Email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent">' +
-                '<input type="password" id="signup-password" placeholder="Password (min 6 characters)" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent">' +
-                '<button onclick="submitSignup()" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition">Sign Up</button>' +
+                '<div id="signup-form" style="display:none;">' +
+                '<input type="text" id="signup-name" placeholder="Full Name" class="input">' +
+                '<input type="email" id="signup-email" placeholder="Email" class="input">' +
+                '<input type="password" id="signup-password" placeholder="Password (min 6 characters)" class="input">' +
+                '<button onclick="submitSignup()" class="btn btn-primary" style="width: 100%;">Sign Up</button>' +
                 '</div>' +
-                '<p class="text-xs text-gray-500 text-center mt-6">🔥 Powered by Firebase</p>' +
+                '<p class="text-sm text-gray-600 text-center mt-2">🔥 Powered by Firebase</p>' +
                 '</div></div>';
         }
 
         function renderClassSelection() {
             var classesHTML = '';
             if (classes.length > 0) {
-                classesHTML = '<div class="mt-6"><h2 class="text-xl font-semibold text-gray-800 mb-4">Your Classes</h2><div class="grid md:grid-cols-3 gap-4">';
+                classesHTML = '<div class="mt-2"><h2>Your Classes</h2><div class="grid grid-3 gap-2">';
                 for (var i = 0; i < classes.length; i++) {
                     var cls = classes[i];
                     var clsJson = JSON.stringify(cls).replace(/"/g, '&quot;');
-                    classesHTML += '<button onclick="selectClass(\'' + clsJson + '\')" class="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition text-left">' +
-                        '<h3 class="text-lg font-semibold text-gray-800">' + cls.name + '</h3>' +
-                        '<p class="text-sm text-gray-600 mt-2">Code: ' + cls.inviteCode + '</p>' +
+                    classesHTML += '<button onclick="selectClass(\'' + clsJson + '\')" class="card">' +
+                        '<h3>' + cls.name + '</h3>' +
+                        '<p class="text-sm text-gray-600 mt-1">Code: ' + cls.inviteCode + '</p>' +
                         '</button>';
                 }
                 classesHTML += '</div></div>';
             }
 
-            return '<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">' +
-                '<div class="max-w-4xl mx-auto">' +
-                '<div class="flex justify-between items-center mb-8">' +
-                '<div><h1 class="text-3xl font-bold text-gray-800">Welcome, ' + currentUser.name + '!</h1>' +
-                '<p class="text-gray-600 mt-1">Select a class or create a new one</p></div>' +
-                '<button onclick="handleLogout()" class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 transition">' +
-                '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
-                '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>' +
-                '</svg>Logout</button>' +
+            return '<div class="container">' +
+                '<div class="flex flex-between mb-4">' +
+                '<div><h1 style="margin-bottom: 0.25rem;">Welcome, ' + currentUser.name + '!</h1>' +
+                '<p class="text-gray-600">Select a class or create a new one</p></div>' +
+                '<button onclick="handleLogout()" class="btn btn-secondary">Logout</button>' +
                 '</div>' +
-                '<div class="grid md:grid-cols-2 gap-4 mb-6">' +
-                '<button onclick="showCreateClassModal()" class="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition border-2 border-dashed border-indigo-300 hover:border-indigo-500">' +
-                '<svg class="mx-auto mb-3 text-indigo-600" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
-                '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>' +
-                '</svg>' +
-                '<h3 class="text-xl font-semibold text-gray-800">Create New Class</h3>' +
-                '<p class="text-gray-600 text-sm mt-2">Start a new class and invite students</p>' +
+                '<div class="grid grid-2 gap-2 mb-2">' +
+                '<button onclick="showCreateClassModal()" class="card border-dashed text-center">' +
+                '<div style="font-size: 3rem; margin-bottom: 0.5rem;">➕</div>' +
+                '<h3>Create New Class</h3>' +
+                '<p class="text-sm text-gray-600 mt-1">Start a new class and invite students</p>' +
                 '</button>' +
-                '<button onclick="alert(\'Join with code feature coming soon!\')" class="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition border-2 border-gray-200 hover:border-indigo-500">' +
-                '<svg class="mx-auto mb-3 text-indigo-600" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
-                '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>' +
-                '</svg>' +
-                '<h3 class="text-xl font-semibold text-gray-800">Join with Code</h3>' +
-                '<p class="text-gray-600 text-sm mt-2">Enter an invite code to join a class</p>' +
+                '<button onclick="alert(\'Join with code feature coming soon!\')" class="card text-center">' +
+                '<div style="font-size: 3rem; margin-bottom: 0.5rem;">✉️</div>' +
+                '<h3>Join with Code</h3>' +
+                '<p class="text-sm text-gray-600 mt-1">Enter an invite code to join a class</p>' +
                 '</button>' +
                 '</div>' + classesHTML +
-                '</div></div>';
+                '</div>';
         }
 
         function renderMainApp() {
-            return '<div class="min-h-screen bg-gray-50 flex">' +
-                '<div class="w-64 bg-white border-r border-gray-200 flex flex-col">' +
-                '<div class="p-6 border-b border-gray-200">' +
-                '<h2 class="text-2xl font-bold text-indigo-600">' + currentClass.name + '</h2>' +
-                '<p class="text-sm text-gray-600 mt-1">' + currentUser.name + '</p>' +
+            return '<div class="flex">' +
+                '<div class="sidebar">' +
+                '<div class="p-2" style="border-bottom: 1px solid #E5E7EB;">' +
+                '<h2 class="text-indigo-600" style="margin-bottom: 0.25rem;">' + currentClass.name + '</h2>' +
+                '<p class="text-sm text-gray-600">' + currentUser.name + '</p>' +
                 '</div>' +
-                '<nav class="flex-1 p-4">' +
-                '<button onclick="showTab(\'deadlines\')" id="tab-deadlines" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition ' + 
-                (currentTab === 'deadlines' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50') + '">' +
-                '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
-                '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>' +
-                '</svg><span class="font-medium">Deadlines</span></button>' +
-                '<button onclick="showTab(\'homework\')" id="tab-homework" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition ' +
-                (currentTab === 'homework' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50') + '">' +
-                '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
-                '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>' +
-                '</svg><span class="font-medium">Homework Help</span></button>' +
-                '<button onclick="showTab(\'groups\')" id="tab-groups" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition ' +
-                (currentTab === 'groups' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50') + '">' +
-                '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
-                '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>' +
-                '</svg><span class="font-medium">Study Groups</span></button>' +
-                '</nav>' +
-                '<div class="p-4 border-t border-gray-200 space-y-2">' +
-                '<button onclick="showInviteModal()" class="w-full flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">' +
-                '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
-                '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>' +
-                '</svg>Invite Students</button>' +
-                '<button onclick="currentClass = null; currentTab = \'deadlines\'; render()" class="w-full px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition">Change Class</button>' +
+                '<div style="flex: 1; padding: 1rem;">' +
+                '<button onclick="showTab(\'deadlines\')" id="tab-deadlines" class="tab-btn ' + (currentTab === 'deadlines' ? 'active' : '') + '">' +
+                '<span>📅</span><span>Deadlines</span></button>' +
+                '<button onclick="showTab(\'homework\')" id="tab-homework" class="tab-btn ' + (currentTab === 'homework' ? 'active' : '') + '">' +
+                '<span>💬</span><span>Homework Help</span></button>' +
+                '<button onclick="showTab(\'groups\')" id="tab-groups" class="tab-btn ' + (currentTab === 'groups' ? 'active' : '') + '">' +
+                '<span>👥</span><span>Study Groups</span></button>' +
+                '</div>' +
+                '<div class="p-2" style="border-top: 1px solid #E5E7EB;">' +
+                '<button onclick="showInviteModal()" class="btn btn-primary" style="width: 100%; margin-bottom: 0.5rem;">✉️ Invite Students</button>' +
+                '<button onclick="currentClass = null; currentTab = \'deadlines\'; render()" class="btn btn-secondary" style="width: 100%;">Change Class</button>' +
                 '</div></div>' +
-                '<div class="flex-1 p-8 overflow-y-auto">' +
+                '<div class="main-content">' +
                 '<div id="tab-content-deadlines" style="display:' + (currentTab === 'deadlines' ? 'block' : 'none') + '">' + renderDeadlines() + '</div>' +
                 '<div id="tab-content-homework" style="display:' + (currentTab === 'homework' ? 'block' : 'none') + '">' + renderHomework() + '</div>' +
                 '<div id="tab-content-groups" style="display:' + (currentTab === 'groups' ? 'block' : 'none') + '">' + renderGroups() + '</div>' +
                 '</div></div>' +
-                '<div id="modal-overlay" style="display:none;" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onclick="closeModals()">' +
-                '<div onclick="event.stopPropagation()" class="bg-white rounded-2xl p-6 w-full max-w-md" id="modal-content"></div></div>';
+                '<div id="modal-overlay" class="modal" onclick="closeModals()">' +
+                '<div onclick="event.stopPropagation()" class="modal-content" id="modal-content"></div></div>';
         }
 
         function renderDeadlines() {
-            var html = '<h1 class="text-3xl font-bold text-gray-800 mb-6">Deadlines</h1>' +
-                '<div class="bg-white rounded-xl shadow-md p-6 mb-6">' +
-                '<h2 class="text-xl font-semibold text-gray-800 mb-4">Add New Deadline</h2>' +
-                '<div class="grid md:grid-cols-3 gap-4">' +
-                '<input type="text" id="deadline-title" placeholder="Assignment title" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent">' +
-                '<input type="date" id="deadline-date" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent">' +
-                '<input type="text" id="deadline-subject" placeholder="Subject (optional)" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent">' +
-                '<button onclick="submitDeadline()" class="md:col-span-3 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition">Add Deadline</button>' +
-                '</div></div><div class="space-y-4">';
+            var html = '<h1>Deadlines</h1>' +
+                '<div class="card mb-2">' +
+                '<h2>Add New Deadline</h2>' +
+                '<div class="grid grid-3 gap-1">' +
+                '<input type="text" id="deadline-title" placeholder="Assignment title" class="input">' +
+                '<input type="date" id="deadline-date" class="input">' +
+                '<input type="text" id="deadline-subject" placeholder="Subject (optional)" class="input">' +
+                '</div>' +
+                '<button onclick="submitDeadline()" class="btn btn-primary" style="width: 100%;">Add Deadline</button>' +
+                '</div><div class="grid gap-2">';
 
             if (deadlines.length === 0) {
-                html += '<p class="text-gray-600 text-center py-8">No deadlines yet. Add one above!</p>';
+                html += '<p class="text-gray-600 text-center p-2">No deadlines yet. Add one above!</p>';
             } else {
                 for (var i = 0; i < deadlines.length; i++) {
                     var d = deadlines[i];
-                    html += '<div class="bg-white rounded-lg shadow-md p-6">' +
-                        '<div class="flex justify-between items-start"><div><h3 class="text-lg font-semibold text-gray-800">' + d.title + '</h3>';
+                    html += '<div class="card">' +
+                        '<div class="flex flex-between"><div><h3>' + d.title + '</h3>';
                     if (d.subject) {
-                        html += '<span class="inline-block mt-2 px-3 py-1 bg-indigo-100 text-indigo-700 text-sm rounded-full">' + d.subject + '</span>';
+                        html += '<span class="badge mt-1">' + d.subject + '</span>';
                     }
-                    html += '</div><div class="text-right"><p class="text-sm text-gray-600">Due Date</p><p class="text-lg font-semibold text-gray-800">' + d.date + '</p></div></div></div>';
+                    html += '</div><div style="text-align: right;"><p class="text-sm text-gray-600">Due Date</p><p class="text-lg font-semibold">' + d.date + '</p></div></div></div>';
                 }
             }
             return html + '</div>';
         }
 
         function renderHomework() {
-            var html = '<h1 class="text-3xl font-bold text-gray-800 mb-6">Homework Help</h1>' +
-                '<div class="bg-white rounded-xl shadow-md p-6 mb-6">' +
-                '<h2 class="text-xl font-semibold text-gray-800 mb-4">Ask for Help</h2>' +
-                '<div class="space-y-4">' +
-                '<input type="text" id="post-title" placeholder="Question title" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent">' +
-                '<textarea id="post-description" placeholder="Describe your question..." rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent"></textarea>' +
-                '<button onclick="submitPost()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">Post Question</button>' +
-                '</div></div><div class="space-y-4">';
+            var html = '<h1>Homework Help</h1>' +
+                '<div class="card mb-2">' +
+                '<h2>Ask for Help</h2>' +
+                '<input type="text" id="post-title" placeholder="Question title" class="input">' +
+                '<textarea id="post-description" placeholder="Describe your question..." class="input"></textarea>' +
+                '<button onclick="submitPost()" class="btn btn-primary">Post Question</button>' +
+                '</div><div class="grid gap-2">';
 
             if (posts.length === 0) {
-                html += '<p class="text-gray-600 text-center py-8">No questions yet. Be the first to ask!</p>';
+                html += '<p class="text-gray-600 text-center p-2">No questions yet. Be the first to ask!</p>';
             } else {
                 for (var i = 0; i < posts.length; i++) {
                     var p = posts[i];
-                    html += '<div class="bg-white rounded-lg shadow-md p-6">' +
-                        '<div class="flex items-start gap-4">' +
-                        '<div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold flex-shrink-0">' +
-                        p.author.charAt(0).toUpperCase() + '</div>' +
-                        '<div class="flex-1"><div class="flex items-center gap-2 mb-2">' +
-                        '<span class="font-semibold text-gray-800">' + p.author + '</span>' +
-                        '<span class="text-sm text-gray-500">' + new Date(p.timestamp).toLocaleDateString() + '</span></div>' +
-                        '<h3 class="text-lg font-semibold text-gray-800 mb-2">' + p.title + '</h3>' +
-                        '<p class="text-gray-600 mb-3">' + (p.description || '') + '</p>' +
-                        '<button class="text-indigo-600 hover:text-indigo-700 text-sm font-medium">Reply</button>' +
+                    html += '<div class="card">' +
+                        '<div class="flex gap-2">' +
+                        '<div class="avatar">' + p.author.charAt(0).toUpperCase() + '</div>' +
+                        '<div style="flex: 1;"><div class="flex gap-1 mb-1">' +
+                        '<span class="font-semibold">' + p.author + '</span>' +
+                        '<span class="text-sm text-gray-600">' + new Date(p.timestamp).toLocaleDateString() + '</span></div>' +
+                        '<h3 class="mb-1">' + p.title + '</h3>' +
+                        '<p class="text-gray-600 mb-1">' + (p.description || '') + '</p>' +
+                        '<button class="btn btn-secondary text-sm">Reply</button>' +
                         '</div></div></div>';
                 }
             }
@@ -435,54 +572,47 @@
         }
 
         function renderGroups() {
-            var html = '<h1 class="text-3xl font-bold text-gray-800 mb-6">Study Groups</h1>' +
-                '<div class="bg-white rounded-xl shadow-md p-6 mb-6">' +
-                '<h2 class="text-xl font-semibold text-gray-800 mb-4">Create Study Group</h2>' +
-                '<div class="space-y-4">' +
-                '<input type="text" id="group-name" placeholder="Group name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent">' +
-                '<input type="text" id="group-time" placeholder="Meeting time (e.g., Mon/Wed 3pm)" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent">' +
-                '<input type="text" id="group-members" placeholder="Max members" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent">' +
-                '<button onclick="submitGroup()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">Create Group</button>' +
-                '</div></div><div class="grid md:grid-cols-2 gap-4">';
+            var html = '<h1>Study Groups</h1>' +
+                '<div class="card mb-2">' +
+                '<h2>Create Study Group</h2>' +
+                '<input type="text" id="group-name" placeholder="Group name" class="input">' +
+                '<input type="text" id="group-time" placeholder="Meeting time (e.g., Mon/Wed 3pm)" class="input">' +
+                '<input type="text" id="group-members" placeholder="Max members" class="input">' +
+                '<button onclick="submitGroup()" class="btn btn-primary">Create Group</button>' +
+                '</div><div class="grid grid-2 gap-2">';
 
             if (groups.length === 0) {
-                html += '<p class="text-gray-600 text-center py-8 col-span-2">No study groups yet. Create one above!</p>';
+                html += '<p class="text-gray-600 text-center p-2" style="grid-column: 1 / -1;">No study groups yet. Create one above!</p>';
             } else {
                 for (var i = 0; i < groups.length; i++) {
                     var g = groups[i];
-                    html += '<div class="bg-white rounded-lg shadow-md p-6">' +
-                        '<h3 class="text-lg font-semibold text-gray-800 mb-2">' + g.name + '</h3>' +
-                        '<p class="text-sm text-gray-600 mb-1"><span class="font-medium">Created by:</span> ' + g.creator + '</p>';
+                    html += '<div class="card">' +
+                        '<h3 class="mb-1">' + g.name + '</h3>' +
+                        '<p class="text-sm text-gray-600 mb-1"><span class="font-semibold">Created by:</span> ' + g.creator + '</p>';
                     if (g.time) {
-                        html += '<p class="text-sm text-gray-600 mb-1"><span class="font-medium">Meets:</span> ' + g.time + '</p>';
+                        html += '<p class="text-sm text-gray-600 mb-1"><span class="font-semibold">Meets:</span> ' + g.time + '</p>';
                     }
                     if (g.members) {
-                        html += '<p class="text-sm text-gray-600 mb-4"><span class="font-medium">Max members:</span> ' + g.members + '</p>';
+                        html += '<p class="text-sm text-gray-600 mb-2"><span class="font-semibold">Max members:</span> ' + g.members + '</p>';
                     }
-                    html += '<button class="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition">Join Group</button></div>';
+                    html += '<button class="btn btn-primary" style="width: 100%;">Join Group</button></div>';
                 }
             }
             return html + '</div>';
         }
 
         function showLogin() {
-            document.getElementById('login-tab').className = 'flex-1 py-2 rounded-lg font-medium transition bg-indigo-600 text-white';
-            document.getElementById('signup-tab').className = 'flex-1 py-2 rounded-lg font-medium transition bg-gray-100 text-gray-600';
+            document.getElementById('login-tab').className = 'btn btn-primary';
+            document.getElementById('signup-tab').className = 'btn btn-secondary';
             document.getElementById('login-form').style.display = 'block';
             document.getElementById('signup-form').style.display = 'none';
         }
 
         function showSignup() {
-            document.getElementById('signup-tab').className = 'flex-1 py-2 rounded-lg font-medium transition bg-indigo-600 text-white';
-            document.getElementById('login-tab').className = 'flex-1 py-2 rounded-lg font-medium transition bg-gray-100 text-gray-600';
+            document.getElementById('signup-tab').className = 'btn btn-primary';
+            document.getElementById('login-tab').className = 'btn btn-secondary';
             document.getElementById('signup-form').style.display = 'block';
             document.getElementById('login-form').style.display = 'none';
-        }
-
-        function submitLogin() {
-            var email = document.getElementById('login-email').value;
-            var password = document.getElementById('login-password').value;
-            handleLogin(email, password);
         }
 
         function submitSignup() {
@@ -493,13 +623,14 @@
         }
 
         function showCreateClassModal() {
-            document.getElementById('modal-overlay').style.display = 'flex';
+            var modal = document.getElementById('modal-overlay');
+            modal.className = 'modal show';
             document.getElementById('modal-content').innerHTML =
-                '<h2 class="text-2xl font-bold text-gray-800 mb-4">Create New Class</h2>' +
-                '<input type="text" id="new-class-name" placeholder="Class Name (e.g., Math 3A)" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent mb-4">' +
-                '<div class="flex gap-3">' +
-                '<button onclick="closeModals()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">Cancel</button>' +
-                '<button onclick="submitCreateClass()" class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">Create</button>' +
+                '<h2 class="mb-2">Create New Class</h2>' +
+                '<input type="text" id="new-class-name" placeholder="Class Name (e.g., Math 3A)" class="input">' +
+                '<div class="flex gap-1">' +
+                '<button onclick="closeModals()" class="btn btn-secondary" style="flex: 1;">Cancel</button>' +
+                '<button onclick="submitCreateClass()" class="btn btn-primary" style="flex: 1;">Create</button>' +
                 '</div>';
         }
 
@@ -509,18 +640,16 @@
         }
 
         function showInviteModal() {
-            document.getElementById('modal-overlay').style.display = 'flex';
+            var modal = document.getElementById('modal-overlay');
+            modal.className = 'modal show';
             document.getElementById('modal-content').innerHTML =
-                '<h2 class="text-2xl font-bold text-gray-800 mb-4">Invite Students</h2>' +
-                '<p class="text-gray-600 mb-4">Share this code with students to let them join your class:</p>' +
-                '<div class="bg-indigo-50 rounded-lg p-4 mb-4">' +
-                '<p class="text-center text-3xl font-bold text-indigo-600 tracking-wider">' + currentClass.inviteCode + '</p>' +
+                '<h2 class="mb-2">Invite Students</h2>' +
+                '<p class="text-gray-600 mb-2">Share this code with students to let them join your class:</p>' +
+                '<div class="bg-indigo-50 p-2 mb-2" style="border-radius: 0.5rem;">' +
+                '<p class="text-center text-3xl font-bold text-indigo-600" style="letter-spacing: 0.1em;">' + currentClass.inviteCode + '</p>' +
                 '</div>' +
-                '<button onclick="copyInviteCode()" class="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition mb-3">' +
-                '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
-                '<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>' +
-                '</svg>Copy Code</button>' +
-                '<button onclick="closeModals()" class="w-full py-2 text-gray-600 hover:text-gray-800 transition">Close</button>';
+                '<button onclick="copyInviteCode()" class="btn btn-primary mb-1" style="width: 100%;">📋 Copy Code</button>' +
+                '<button onclick="closeModals()" class="btn btn-secondary" style="width: 100%;">Close</button>';
         }
 
         function copyInviteCode() {
@@ -531,7 +660,7 @@
         function closeModals() {
             var overlay = document.getElementById('modal-overlay');
             if (overlay) {
-                overlay.style.display = 'none';
+                overlay.className = 'modal';
             }
         }
 
@@ -548,11 +677,7 @@
                 }
                 
                 if (button) {
-                    if (tabs[i] === tab) {
-                        button.className = 'w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition bg-indigo-50 text-indigo-600';
-                    } else {
-                        button.className = 'w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition text-gray-700 hover:bg-gray-50';
-                    }
+                    button.className = tabs[i] === tab ? 'tab-btn active' : 'tab-btn';
                 }
             }
         }
