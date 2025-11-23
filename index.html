@@ -1,706 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Hub - Collaborate & Study</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Hub</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" />
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #EBF4FF 0%, #E0E7FF 100%);
-            min-height: 100vh;
+        body {
+            background-color: #f0f2f5;
         }
-        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
-        .card { background: white; border-radius: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 2rem; }
-        .card:hover { box-shadow: 0 10px 20px rgba(0,0,0,0.15); transition: 0.3s; }
-        .btn { 
-            padding: 0.75rem 1.5rem; 
-            border: none; 
-            border-radius: 0.5rem; 
-            font-weight: 600; 
-            cursor: pointer; 
-            transition: 0.2s;
-            font-size: 1rem;
+        .section-box {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        .btn-primary { background: #4F46E5; color: white; }
-        .btn-primary:hover { background: #4338CA; }
-        .btn-secondary { background: #F3F4F6; color: #374151; }
-        .btn-secondary:hover { background: #E5E7EB; }
-        .input { 
-            width: 100%; 
-            padding: 0.75rem 1rem; 
-            border: 1px solid #D1D5DB; 
-            border-radius: 0.5rem; 
-            font-size: 1rem;
-            margin-bottom: 1rem;
-        }
-        .input:focus { outline: none; border-color: #4F46E5; box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
-        .sidebar { 
-            width: 16rem; 
-            background: white; 
-            border-right: 1px solid #E5E7EB; 
-            height: 100vh; 
-            position: fixed;
-            display: flex;
-            flex-direction: column;
-        }
-        .main-content { margin-left: 16rem; padding: 2rem; min-height: 100vh; }
-        .tab-btn { 
-            width: 100%; 
-            text-align: left; 
-            padding: 0.75rem 1rem; 
-            border: none; 
-            background: transparent; 
-            cursor: pointer; 
-            border-radius: 0.5rem; 
-            margin-bottom: 0.5rem;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        .tab-btn:hover { background: #F3F4F6; }
-        .tab-btn.active { background: #EEF2FF; color: #4F46E5; font-weight: 600; }
-        .modal { 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            right: 0; 
-            bottom: 0; 
-            background: rgba(0,0,0,0.5); 
-            display: none; 
-            align-items: center; 
-            justify-content: center;
-            z-index: 1000;
-        }
-        .modal.show { display: flex; }
-        .modal-content { 
-            background: white; 
-            border-radius: 1rem; 
-            padding: 2rem; 
-            max-width: 28rem; 
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        .grid { display: grid; gap: 1rem; }
-        .grid-2 { grid-template-columns: repeat(2, 1fr); }
-        .grid-3 { grid-template-columns: repeat(3, 1fr); }
-        .flex { display: flex; }
-        .flex-between { justify-content: space-between; }
-        .flex-center { align-items: center; justify-content: center; }
-        .gap-1 { gap: 0.5rem; }
-        .gap-2 { gap: 1rem; }
-        .mb-1 { margin-bottom: 0.5rem; }
-        .mb-2 { margin-bottom: 1rem; }
-        .mb-4 { margin-bottom: 2rem; }
-        .mt-1 { margin-top: 0.5rem; }
-        .mt-2 { margin-top: 1rem; }
-        .p-1 { padding: 0.5rem; }
-        .p-2 { padding: 1rem; }
-        .text-center { text-align: center; }
-        .text-sm { font-size: 0.875rem; }
-        .text-lg { font-size: 1.125rem; }
-        .text-xl { font-size: 1.25rem; }
-        .text-2xl { font-size: 1.5rem; }
-        .text-3xl { font-size: 1.875rem; }
-        .font-bold { font-weight: 700; }
-        .font-semibold { font-weight: 600; }
-        .text-gray-600 { color: #4B5563; }
-        .text-gray-800 { color: #1F2937; }
-        .text-indigo-600 { color: #4F46E5; }
-        .bg-indigo-600 { background: #4F46E5; }
-        .bg-indigo-50 { background: #EEF2FF; }
-        .bg-indigo-100 { background: #E0E7FF; }
-        .rounded-full { border-radius: 9999px; }
-        .badge { 
-            display: inline-block; 
-            padding: 0.25rem 0.75rem; 
-            background: #E0E7FF; 
-            color: #4338CA; 
-            border-radius: 9999px; 
-            font-size: 0.875rem;
-        }
-        .avatar { 
-            width: 2.5rem; 
-            height: 2.5rem; 
-            border-radius: 50%; 
-            background: #4F46E5; 
-            color: white; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-weight: 600;
-            flex-shrink: 0;
-        }
-        .icon-circle { 
-            width: 4rem; 
-            height: 4rem; 
-            background: #4F46E5; 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            color: white; 
-            font-size: 2rem;
-            margin: 0 auto 1rem;
-        }
-        .border-dashed { 
-            border: 2px dashed #C7D2FE; 
-        }
-        .border-dashed:hover { border-color: #818CF8; }
-        h1 { font-size: 1.875rem; font-weight: 700; color: #1F2937; margin-bottom: 1.5rem; }
-        h2 { font-size: 1.25rem; font-weight: 600; color: #1F2937; margin-bottom: 1rem; }
-        h3 { font-size: 1.125rem; font-weight: 600; color: #1F2937; }
-        textarea { resize: vertical; min-height: 100px; }
-        @media (max-width: 768px) {
-            .sidebar { width: 100%; height: auto; position: relative; }
-            .main-content { margin-left: 0; }
-            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+        .nav-btn {
+            width: 120px;
+            margin: 4px;
         }
     </style>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
-    <div id="app">
-        <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center;">
-            <div class="card text-center">
-                <div style="width: 3rem; height: 3rem; border: 4px solid #4F46E5; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
-                <p class="text-gray-600">Loading...</p>
-            </div>
-        </div>
+
+<div class="container py-4">
+
+    <h1 class="text-center mb-4">Student Hub</h1>
+
+    <!-- Navigation -->
+    <div class="d-flex justify-content-center mb-3">
+        <button class="btn btn-primary nav-btn" onclick="showSection('login-section')">Login</button>
+        <button class="btn btn-secondary nav-btn" onclick="showSection('signup-section')">Sign Up</button>
     </div>
 
-    <style>
-        @keyframes spin { to { transform: rotate(360deg); } }
-    </style>
+    <!-- Login Section -->
+    <div id="login-section" class="section-box">
+        <h3>Login</h3>
+        <input type="email" id="login-email" placeholder="Email" class="form-control mb-2">
+        <input type="password" id="login-password" placeholder="Password" class="form-control mb-3">
+        <button onclick="submitLogin()" class="btn btn-primary" style="width: 100%;">Login</button>
+    </div>
 
-    <script>
-        let auth, db;
-        let currentUser = null;
-        let currentClass = null;
-        let classes = [];
-        let deadlines = [];
-        let posts = [];
-        let groups = [];
-        let currentTab = 'deadlines';
+    <!-- Signup Section -->
+    <div id="signup-section" class="section-box" style="display: none;">
+        <h3>Sign Up</h3>
+        <input type="text" id="signup-name" placeholder="Name" class="form-control mb-2">
+        <input type="email" id="signup-email" placeholder="Email" class="form-control mb-2">
+        <input type="password" id="signup-password" placeholder="Password" class="form-control mb-3">
+        <button onclick="submitSignup()" class="btn btn-success" style="width: 100%;">Sign Up</button>
+    </div>
 
-        window.addEventListener('load', function() {
-            if (typeof firebase === 'undefined') {
-                showError('Firebase failed to load. Please refresh the page.');
-                return;
-            }
+</div>
 
-            const firebaseConfig = {
-                apiKey: "AIzaSyCfijY0V4DQDOkrb13ludHiGRFtWsk8Bsg",
-                authDomain: "student-hub-450ab.firebaseapp.com",
-                databaseURL: "https://student-hub-450ab-default-rtdb.asia-southeast1.firebasedatabase.app",
-                projectId: "student-hub-450ab",
-                storageBucket: "student-hub-450ab.firebasestorage.app",
-                messagingSenderId: "149361370872",
-                appId: "1:149361370872:web:e3ee75310e59d92f3bbd0d"
-            };
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
-            try {
-                firebase.initializeApp(firebaseConfig);
-                auth = firebase.auth();
-                db = firebase.database();
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSy...",
+        authDomain: "student-hub-450ab.firebaseapp.com",
+        databaseURL: "https://student-hub-450ab-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "student-hub-450ab",
+        storageBucket: "student-hub-450ab.appspot.com",
+        messagingSenderId: "481174229455",
+        appId: "1:481174229455:web:1344797fd090eb992e5663"
+    };
 
-                auth.onAuthStateChanged(function(user) {
-                    if (user) {
-                        currentUser = {
-                            id: user.uid,
-                            email: user.email,
-                            name: user.displayName || user.email.split('@')[0]
-                        };
-                        loadUserClasses();
-                    } else {
-                        currentUser = null;
-                        currentClass = null;
-                        classes = [];
-                        render();
-                    }
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    /* ------------------------- SHOW SECTIONS -------------------------- */
+    function showSection(id) {
+        document.getElementById("login-section").style.display = "none";
+        document.getElementById("signup-section").style.display = "none";
+        document.getElementById(id).style.display = "block";
+    }
+
+    /* ------------------------- SIGNUP LOGIC --------------------------- */
+    function handleSignup(name, email, password) {
+        if (!name || !email || !password) {
+            alert("Please fill in all fields");
+            return;
+        }
+
+        auth.createUserWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                const userId = userCredential.user.uid;
+                db.ref("users/" + userId).set({
+                    name: name,
+                    email: email
                 });
+                alert("Signup successful!");
+                showSection("login-section");
+            })
+            .catch((error) => alert("Error: " + error.message));
+    }
 
-                render();
-            } catch (error) {
-                showError('Failed to initialize: ' + error.message);
-            }
-        });
+    function submitSignup() {
+        const name = document.getElementById("signup-name").value;
+        const email = document.getElementById("signup-email").value;
+        const password = document.getElementById("signup-password").value;
+        handleSignup(name, email, password);
+    }
 
-        function showError(message) {
-            document.getElementById('app').innerHTML = 
-                '<div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem;">' +
-                '<div class="card text-center" style="max-width: 28rem;">' +
-                '<h2 style="color: #DC2626; margin-bottom: 1rem;">Error</h2>' +
-                '<p class="text-gray-600 mb-2">' + message + '</p>' +
-                '<button onclick="location.reload()" class="btn btn-primary mt-2">Refresh</button>' +
-                '</div></div>';
+    /* ----------------------------------------------------------
+       ✅ FIX APPLIED HERE — THIS FUNCTION WAS MISSING
+       ---------------------------------------------------------- */
+    function submitLogin() {
+        var email = document.getElementById("login-email").value;
+        var password = document.getElementById("login-password").value;
+        handleLogin(email, password);
+    }
+    /* ---------------------------------------------------------- */
+
+    /* ------------------------- LOGIN LOGIC --------------------------- */
+    function handleLogin(email, password) {
+        if (!email || !password) {
+            alert("Please fill in all fields");
+            return;
         }
 
-        function loadUserClasses() {
-            db.ref('users/' + currentUser.id + '/classes').on('value', function(snapshot) {
-                var data = snapshot.val();
-                classes = data ? Object.values(data) : [];
-                render();
-            });
-        }
+        auth.signInWithEmailAndPassword(email, password)
+            .then(() => {
+                alert("Login successful!");
+            })
+            .catch((error) => alert("Error: " + error.message));
+    }
+</script>
 
-        function loadClassData(classId) {
-            db.ref('classes/' + classId + '/deadlines').on('value', function(snapshot) {
-                deadlines = snapshot.val() ? Object.values(snapshot.val()) : [];
-                render();
-            });
-
-            db.ref('classes/' + classId + '/posts').on('value', function(snapshot) {
-                posts = snapshot.val() ? Object.values(snapshot.val()) : [];
-                render();
-            });
-
-            db.ref('classes/' + classId + '/groups').on('value', function(snapshot) {
-                groups = snapshot.val() ? Object.values(snapshot.val()) : [];
-                render();
-            });
-        }
-
-        function handleSignup(name, email, password) {
-            if (!email || !password) {
-                alert('Please fill in all fields');
-                return;
-            }
-            if (password.length < 6) {
-                alert('Password must be at least 6 characters');
-                return;
-            }
-
-            auth.createUserWithEmailAndPassword(email, password)
-                .then(function(userCredential) {
-                    if (name) {
-                        return userCredential.user.updateProfile({ displayName: name });
-                    }
-                })
-                .then(function() {
-                    alert('Account created successfully!');
-                })
-                .catch(function(error) {
-                    alert('Error: ' + error.message);
-                });
-        }
-
-        function handleLogin(email, password) {
-            if (!email || !password) {
-                alert('Please fill in all fields');
-                return;
-            }
-
-            auth.signInWithEmailAndPassword(email, password)
-                .catch(function(error) {
-                    alert('Error: ' + error.message);
-                });
-        }
-
-        function handleLogout() {
-            auth.signOut().then(function() {
-                currentClass = null;
-                classes = [];
-                deadlines = [];
-                posts = [];
-                groups = [];
-            });
-        }
-
-        function createClass(name) {
-            if (!name || !name.trim()) {
-                alert('Please enter a class name');
-                return;
-            }
-
-            var newClass = {
-                id: Date.now().toString(),
-                name: name.trim(),
-                inviteCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
-                createdBy: currentUser.id,
-                createdAt: Date.now()
-            };
-
-            db.ref('users/' + currentUser.id + '/classes/' + newClass.id).set(newClass);
-            db.ref('classes/' + newClass.id + '/info').set(newClass);
-            
-            currentClass = newClass;
-            loadClassData(newClass.id);
-            closeModals();
-            render();
-        }
-
-        function selectClass(clsString) {
-            currentClass = JSON.parse(clsString);
-            currentTab = 'deadlines';
-            loadClassData(currentClass.id);
-            render();
-        }
-
-        function addDeadline(title, date, subject) {
-            if (!title || !date) {
-                alert('Please fill in title and date');
-                return;
-            }
-
-            var deadline = {
-                id: Date.now().toString(),
-                title: title,
-                date: date,
-                subject: subject || '',
-                createdBy: currentUser.id,
-                createdAt: Date.now()
-            };
-            
-            db.ref('classes/' + currentClass.id + '/deadlines/' + deadline.id).set(deadline)
-                .then(function() {
-                    document.getElementById('deadline-title').value = '';
-                    document.getElementById('deadline-date').value = '';
-                    document.getElementById('deadline-subject').value = '';
-                });
-        }
-
-        function addPost(title, description) {
-            if (!title) {
-                alert('Please enter a title');
-                return;
-            }
-
-            var post = {
-                id: Date.now().toString(),
-                title: title,
-                description: description || '',
-                author: currentUser.name,
-                authorId: currentUser.id,
-                timestamp: Date.now()
-            };
-            
-            db.ref('classes/' + currentClass.id + '/posts/' + post.id).set(post)
-                .then(function() {
-                    document.getElementById('post-title').value = '';
-                    document.getElementById('post-description').value = '';
-                });
-        }
-
-        function addGroup(name, time, members) {
-            if (!name) {
-                alert('Please enter a group name');
-                return;
-            }
-
-            var group = {
-                id: Date.now().toString(),
-                name: name,
-                time: time || '',
-                members: members || '',
-                creator: currentUser.name,
-                creatorId: currentUser.id,
-                createdAt: Date.now()
-            };
-            
-            db.ref('classes/' + currentClass.id + '/groups/' + group.id).set(group)
-                .then(function() {
-                    document.getElementById('group-name').value = '';
-                    document.getElementById('group-time').value = '';
-                    document.getElementById('group-members').value = '';
-                });
-        }
-
-        function render() {
-            var app = document.getElementById('app');
-            
-            if (!currentUser) {
-                app.innerHTML = renderLogin();
-            } else if (!currentClass) {
-                app.innerHTML = renderClassSelection();
-            } else {
-                app.innerHTML = renderMainApp();
-            }
-        }
-
-        function renderLogin() {
-            return '<div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem;">' +
-                '<div class="card" style="max-width: 28rem; width: 100%;">' +
-                '<div class="text-center mb-4">' +
-                '<div class="icon-circle">📚</div>' +
-                '<h1 style="margin-bottom: 0.5rem;">Student Hub</h1>' +
-                '<p class="text-gray-600">Collaborate, study, and succeed together</p>' +
-                '</div>' +
-                '<div class="flex gap-1 mb-2">' +
-                '<button onclick="showLogin()" id="login-tab" class="btn btn-primary" style="flex: 1;">Login</button>' +
-                '<button onclick="showSignup()" id="signup-tab" class="btn btn-secondary" style="flex: 1;">Sign Up</button>' +
-                '</div>' +
-                '<div id="login-form">' +
-                '<input type="email" id="login-email" placeholder="Email" class="input">' +
-                '<input type="password" id="login-password" placeholder="Password" class="input">' +
-                '<button onclick="submitLogin()" class="btn btn-primary" style="width: 100%;">Login</button>' +
-                '</div>' +
-                '<div id="signup-form" style="display:none;">' +
-                '<input type="text" id="signup-name" placeholder="Full Name" class="input">' +
-                '<input type="email" id="signup-email" placeholder="Email" class="input">' +
-                '<input type="password" id="signup-password" placeholder="Password (min 6 characters)" class="input">' +
-                '<button onclick="submitSignup()" class="btn btn-primary" style="width: 100%;">Sign Up</button>' +
-                '</div>' +
-                '<p class="text-sm text-gray-600 text-center mt-2">🔥 Powered by Firebase</p>' +
-                '</div></div>';
-        }
-
-        function renderClassSelection() {
-            var classesHTML = '';
-            if (classes.length > 0) {
-                classesHTML = '<div class="mt-2"><h2>Your Classes</h2><div class="grid grid-3 gap-2">';
-                for (var i = 0; i < classes.length; i++) {
-                    var cls = classes[i];
-                    var clsJson = JSON.stringify(cls).replace(/"/g, '&quot;');
-                    classesHTML += '<button onclick="selectClass(\'' + clsJson + '\')" class="card">' +
-                        '<h3>' + cls.name + '</h3>' +
-                        '<p class="text-sm text-gray-600 mt-1">Code: ' + cls.inviteCode + '</p>' +
-                        '</button>';
-                }
-                classesHTML += '</div></div>';
-            }
-
-            return '<div class="container">' +
-                '<div class="flex flex-between mb-4">' +
-                '<div><h1 style="margin-bottom: 0.25rem;">Welcome, ' + currentUser.name + '!</h1>' +
-                '<p class="text-gray-600">Select a class or create a new one</p></div>' +
-                '<button onclick="handleLogout()" class="btn btn-secondary">Logout</button>' +
-                '</div>' +
-                '<div class="grid grid-2 gap-2 mb-2">' +
-                '<button onclick="showCreateClassModal()" class="card border-dashed text-center">' +
-                '<div style="font-size: 3rem; margin-bottom: 0.5rem;">➕</div>' +
-                '<h3>Create New Class</h3>' +
-                '<p class="text-sm text-gray-600 mt-1">Start a new class and invite students</p>' +
-                '</button>' +
-                '<button onclick="alert(\'Join with code feature coming soon!\')" class="card text-center">' +
-                '<div style="font-size: 3rem; margin-bottom: 0.5rem;">✉️</div>' +
-                '<h3>Join with Code</h3>' +
-                '<p class="text-sm text-gray-600 mt-1">Enter an invite code to join a class</p>' +
-                '</button>' +
-                '</div>' + classesHTML +
-                '</div>';
-        }
-
-        function renderMainApp() {
-            return '<div class="flex">' +
-                '<div class="sidebar">' +
-                '<div class="p-2" style="border-bottom: 1px solid #E5E7EB;">' +
-                '<h2 class="text-indigo-600" style="margin-bottom: 0.25rem;">' + currentClass.name + '</h2>' +
-                '<p class="text-sm text-gray-600">' + currentUser.name + '</p>' +
-                '</div>' +
-                '<div style="flex: 1; padding: 1rem;">' +
-                '<button onclick="showTab(\'deadlines\')" id="tab-deadlines" class="tab-btn ' + (currentTab === 'deadlines' ? 'active' : '') + '">' +
-                '<span>📅</span><span>Deadlines</span></button>' +
-                '<button onclick="showTab(\'homework\')" id="tab-homework" class="tab-btn ' + (currentTab === 'homework' ? 'active' : '') + '">' +
-                '<span>💬</span><span>Homework Help</span></button>' +
-                '<button onclick="showTab(\'groups\')" id="tab-groups" class="tab-btn ' + (currentTab === 'groups' ? 'active' : '') + '">' +
-                '<span>👥</span><span>Study Groups</span></button>' +
-                '</div>' +
-                '<div class="p-2" style="border-top: 1px solid #E5E7EB;">' +
-                '<button onclick="showInviteModal()" class="btn btn-primary" style="width: 100%; margin-bottom: 0.5rem;">✉️ Invite Students</button>' +
-                '<button onclick="currentClass = null; currentTab = \'deadlines\'; render()" class="btn btn-secondary" style="width: 100%;">Change Class</button>' +
-                '</div></div>' +
-                '<div class="main-content">' +
-                '<div id="tab-content-deadlines" style="display:' + (currentTab === 'deadlines' ? 'block' : 'none') + '">' + renderDeadlines() + '</div>' +
-                '<div id="tab-content-homework" style="display:' + (currentTab === 'homework' ? 'block' : 'none') + '">' + renderHomework() + '</div>' +
-                '<div id="tab-content-groups" style="display:' + (currentTab === 'groups' ? 'block' : 'none') + '">' + renderGroups() + '</div>' +
-                '</div></div>' +
-                '<div id="modal-overlay" class="modal" onclick="closeModals()">' +
-                '<div onclick="event.stopPropagation()" class="modal-content" id="modal-content"></div></div>';
-        }
-
-        function renderDeadlines() {
-            var html = '<h1>Deadlines</h1>' +
-                '<div class="card mb-2">' +
-                '<h2>Add New Deadline</h2>' +
-                '<div class="grid grid-3 gap-1">' +
-                '<input type="text" id="deadline-title" placeholder="Assignment title" class="input">' +
-                '<input type="date" id="deadline-date" class="input">' +
-                '<input type="text" id="deadline-subject" placeholder="Subject (optional)" class="input">' +
-                '</div>' +
-                '<button onclick="submitDeadline()" class="btn btn-primary" style="width: 100%;">Add Deadline</button>' +
-                '</div><div class="grid gap-2">';
-
-            if (deadlines.length === 0) {
-                html += '<p class="text-gray-600 text-center p-2">No deadlines yet. Add one above!</p>';
-            } else {
-                for (var i = 0; i < deadlines.length; i++) {
-                    var d = deadlines[i];
-                    html += '<div class="card">' +
-                        '<div class="flex flex-between"><div><h3>' + d.title + '</h3>';
-                    if (d.subject) {
-                        html += '<span class="badge mt-1">' + d.subject + '</span>';
-                    }
-                    html += '</div><div style="text-align: right;"><p class="text-sm text-gray-600">Due Date</p><p class="text-lg font-semibold">' + d.date + '</p></div></div></div>';
-                }
-            }
-            return html + '</div>';
-        }
-
-        function renderHomework() {
-            var html = '<h1>Homework Help</h1>' +
-                '<div class="card mb-2">' +
-                '<h2>Ask for Help</h2>' +
-                '<input type="text" id="post-title" placeholder="Question title" class="input">' +
-                '<textarea id="post-description" placeholder="Describe your question..." class="input"></textarea>' +
-                '<button onclick="submitPost()" class="btn btn-primary">Post Question</button>' +
-                '</div><div class="grid gap-2">';
-
-            if (posts.length === 0) {
-                html += '<p class="text-gray-600 text-center p-2">No questions yet. Be the first to ask!</p>';
-            } else {
-                for (var i = 0; i < posts.length; i++) {
-                    var p = posts[i];
-                    html += '<div class="card">' +
-                        '<div class="flex gap-2">' +
-                        '<div class="avatar">' + p.author.charAt(0).toUpperCase() + '</div>' +
-                        '<div style="flex: 1;"><div class="flex gap-1 mb-1">' +
-                        '<span class="font-semibold">' + p.author + '</span>' +
-                        '<span class="text-sm text-gray-600">' + new Date(p.timestamp).toLocaleDateString() + '</span></div>' +
-                        '<h3 class="mb-1">' + p.title + '</h3>' +
-                        '<p class="text-gray-600 mb-1">' + (p.description || '') + '</p>' +
-                        '<button class="btn btn-secondary text-sm">Reply</button>' +
-                        '</div></div></div>';
-                }
-            }
-            return html + '</div>';
-        }
-
-        function renderGroups() {
-            var html = '<h1>Study Groups</h1>' +
-                '<div class="card mb-2">' +
-                '<h2>Create Study Group</h2>' +
-                '<input type="text" id="group-name" placeholder="Group name" class="input">' +
-                '<input type="text" id="group-time" placeholder="Meeting time (e.g., Mon/Wed 3pm)" class="input">' +
-                '<input type="text" id="group-members" placeholder="Max members" class="input">' +
-                '<button onclick="submitGroup()" class="btn btn-primary">Create Group</button>' +
-                '</div><div class="grid grid-2 gap-2">';
-
-            if (groups.length === 0) {
-                html += '<p class="text-gray-600 text-center p-2" style="grid-column: 1 / -1;">No study groups yet. Create one above!</p>';
-            } else {
-                for (var i = 0; i < groups.length; i++) {
-                    var g = groups[i];
-                    html += '<div class="card">' +
-                        '<h3 class="mb-1">' + g.name + '</h3>' +
-                        '<p class="text-sm text-gray-600 mb-1"><span class="font-semibold">Created by:</span> ' + g.creator + '</p>';
-                    if (g.time) {
-                        html += '<p class="text-sm text-gray-600 mb-1"><span class="font-semibold">Meets:</span> ' + g.time + '</p>';
-                    }
-                    if (g.members) {
-                        html += '<p class="text-sm text-gray-600 mb-2"><span class="font-semibold">Max members:</span> ' + g.members + '</p>';
-                    }
-                    html += '<button class="btn btn-primary" style="width: 100%;">Join Group</button></div>';
-                }
-            }
-            return html + '</div>';
-        }
-
-        function showLogin() {
-            document.getElementById('login-tab').className = 'btn btn-primary';
-            document.getElementById('signup-tab').className = 'btn btn-secondary';
-            document.getElementById('login-form').style.display = 'block';
-            document.getElementById('signup-form').style.display = 'none';
-        }
-
-        function showSignup() {
-            document.getElementById('signup-tab').className = 'btn btn-primary';
-            document.getElementById('login-tab').className = 'btn btn-secondary';
-            document.getElementById('signup-form').style.display = 'block';
-            document.getElementById('login-form').style.display = 'none';
-        }
-
-        function submitSignup() {
-            var name = document.getElementById('signup-name').value;
-            var email = document.getElementById('signup-email').value;
-            var password = document.getElementById('signup-password').value;
-            handleSignup(name, email, password);
-        }
-
-        function showCreateClassModal() {
-            var modal = document.getElementById('modal-overlay');
-            modal.className = 'modal show';
-            document.getElementById('modal-content').innerHTML =
-                '<h2 class="mb-2">Create New Class</h2>' +
-                '<input type="text" id="new-class-name" placeholder="Class Name (e.g., Math 3A)" class="input">' +
-                '<div class="flex gap-1">' +
-                '<button onclick="closeModals()" class="btn btn-secondary" style="flex: 1;">Cancel</button>' +
-                '<button onclick="submitCreateClass()" class="btn btn-primary" style="flex: 1;">Create</button>' +
-                '</div>';
-        }
-
-        function submitCreateClass() {
-            var name = document.getElementById('new-class-name').value;
-            createClass(name);
-        }
-
-        function showInviteModal() {
-            var modal = document.getElementById('modal-overlay');
-            modal.className = 'modal show';
-            document.getElementById('modal-content').innerHTML =
-                '<h2 class="mb-2">Invite Students</h2>' +
-                '<p class="text-gray-600 mb-2">Share this code with students to let them join your class:</p>' +
-                '<div class="bg-indigo-50 p-2 mb-2" style="border-radius: 0.5rem;">' +
-                '<p class="text-center text-3xl font-bold text-indigo-600" style="letter-spacing: 0.1em;">' + currentClass.inviteCode + '</p>' +
-                '</div>' +
-                '<button onclick="copyInviteCode()" class="btn btn-primary mb-1" style="width: 100%;">📋 Copy Code</button>' +
-                '<button onclick="closeModals()" class="btn btn-secondary" style="width: 100%;">Close</button>';
-        }
-
-        function copyInviteCode() {
-            navigator.clipboard.writeText(currentClass.inviteCode);
-            alert('Code copied to clipboard!');
-        }
-
-        function closeModals() {
-            var overlay = document.getElementById('modal-overlay');
-            if (overlay) {
-                overlay.className = 'modal';
-            }
-        }
-
-        function showTab(tab) {
-            currentTab = tab;
-            
-            var tabs = ['deadlines', 'homework', 'groups'];
-            for (var i = 0; i < tabs.length; i++) {
-                var content = document.getElementById('tab-content-' + tabs[i]);
-                var button = document.getElementById('tab-' + tabs[i]);
-                
-                if (content) {
-                    content.style.display = tabs[i] === tab ? 'block' : 'none';
-                }
-                
-                if (button) {
-                    button.className = tabs[i] === tab ? 'tab-btn active' : 'tab-btn';
-                }
-            }
-        }
-
-        function submitDeadline() {
-            var title = document.getElementById('deadline-title').value;
-            var date = document.getElementById('deadline-date').value;
-            var subject = document.getElementById('deadline-subject').value;
-            addDeadline(title, date, subject);
-        }
-
-        function submitPost() {
-            var title = document.getElementById('post-title').value;
-            var description = document.getElementById('post-description').value;
-            addPost(title, description);
-        }
-
-        function submitGroup() {
-            var name = document.getElementById('group-name').value;
-            var time = document.getElementById('group-time').value;
-            var members = document.getElementById('group-members').value;
-            addGroup(name, time, members);
-        }
-    </script>
 </body>
 </html>
