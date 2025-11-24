@@ -300,15 +300,10 @@
             render();
         }
 
-        function selectClass(clsString) {
+        function selectClass(cls) {
             try {
-                // If it's already an object, use it directly
-                if (typeof clsString === 'object') {
-                    currentClass = clsString;
-                } else {
-                    // Otherwise parse the JSON string
-                    currentClass = JSON.parse(clsString);
-                }
+                // cls is already an object, no need to parse
+                currentClass = cls;
                 currentTab = 'deadlines';
                 loadClassData(currentClass.id);
                 render();
@@ -319,8 +314,12 @@
         }
 
         function selectClassByIndex(index) {
+            console.log('Selecting class at index:', index);
+            console.log('Classes array:', classes);
             if (classes[index]) {
                 selectClass(classes[index]);
+            } else {
+                console.error('No class found at index:', index);
             }
         }
 
