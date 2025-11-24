@@ -1,51 +1,4 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Student Hub — Student-run classes</title>
-<style>
-  :root{--indigo:#4F46E5;--muted:#6B7280}
-  *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;}
-  body{margin:0;background:linear-gradient(135deg,#EBF4FF 0%,#E0E7FF 100%);min-height:100vh}
-  .app-wrap{max-width:1100px;margin:20px auto;padding:12px}
-  .card{background:#fff;border-radius:12px;padding:12px;box-shadow:0 6px 18px rgba(15,23,42,0.06)}
-  .grid-2{display:grid;grid-template-columns:260px 1fr;gap:12px}
-  .sidebar{display:flex;flex-direction:column;height:82vh}
-  .logo{display:flex;align-items:center;gap:10px}
-  .avatar{width:40px;height:40px;border-radius:8px;background:var(--indigo);color:white;display:flex;align-items:center;justify-content:center;font-weight:700}
-  .btn{padding:8px 12px;border-radius:8px;border:0;cursor:pointer;font-weight:700}
-  .btn-primary{background:var(--indigo);color:white}
-  .btn-ghost{background:transparent;border:1px solid rgba(79,70,229,0.12);color:var(--indigo)}
-  .small{font-size:13px;color:var(--muted)}
-  .list{margin-top:8px;overflow:auto;padding-right:6px}
-  .class-item{padding:10px;border-radius:8px;cursor:pointer;margin-bottom:8px}
-  .class-item:hover{background:#f4f6ff}
-  .class-selected{background:#eef2ff;border:1px solid #e0e7ff}
-  .tabs{display:flex;gap:8px;margin-top:12px}
-  .tab-btn{padding:8px 10px;border-radius:8px;border:0;background:transparent;cursor:pointer}
-  .tab-btn.active{background:#eef2ff;color:var(--indigo);font-weight:700}
-  .card-scroll{overflow:auto;max-height:62vh}
-  .chat-area{flex:1;padding:12px;overflow:auto;border-radius:10px;background:#fbfcff;border:1px solid #f1f5f9}
-  .msg{display:flex;gap:10px;margin-bottom:12px;align-items:flex-start}
-  .msg.me{flex-direction:row-reverse}
-  .bubble{background:#fff;padding:10px;border-radius:8px;box-shadow:0 3px 10px rgba(15,23,42,0.03);max-width:72%}
-  .bubble.me{background:var(--indigo);color:#fff}
-  .compose{display:flex;gap:8px;padding-top:10px}
-  input[type="text"], textarea, input[type="date"], input[type="email"], input[type="password"]{
-    padding:10px;border-radius:8px;border:1px solid #e6e9f8;flex:1
-  }
-  .muted{color:var(--muted);font-size:13px}
-  .deadline{border-left:4px solid #e6e9ff;padding:8px;border-radius:6px;margin-bottom:8px;background:#fff}
-  .post{padding:8px;border-radius:8px;background:#fff;margin-bottom:8px;border:1px solid #f1f5f9}
-  .reply{padding:6px;border-radius:6px;background:#f8fafc;margin-top:6px}
-  .inline-btn{background:transparent;border:0;color:var(--indigo);cursor:pointer;font-weight:700}
-  .small-action{font-size:12px;color:#374151}
-  @media(max-width:980px){.grid-2{grid-template-columns:1fr}.sidebar{height:auto}}
-</style>
-
-<!-- Firebase compat libs (we use compat because it's easy to paste inside single file) -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+</script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
@@ -1055,7 +1008,3 @@ auth.onAuthStateChanged(user=>{
 /* attempt to populate UI after a short delay if already logged in */
 setTimeout(()=> { if(auth.currentUser){ me = auth.currentUser; loadUserClassesRealtime(); render(); } else render(); }, 300);
 
-</script>
-
-</body>
-</html>
