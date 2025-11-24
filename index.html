@@ -301,10 +301,61 @@
         }
 
         function selectClass(clsString) {
-            currentClass = JSON.parse(clsString);
-            currentTab = 'deadlines';
-            loadClassData(currentClass.id);
-            render();
+            try {
+                // If it's already an object, use it directly
+                if (typeof clsString === 'object') {
+                    currentClass = clsString;
+                } else {
+                    // Otherwise parse the JSON string
+                    currentClass = JSON.parse(clsString);
+                }
+                currentTab = 'deadlines';
+                loadClassData(currentClass.id);
+                render();
+            } catch (error) {
+                console.error('Error selecting class:', error);
+                alert('Error opening class. Please try again.');
+            }
+        }
+
+        function selectClassByIndex(index) {
+            if (classes[index]) {
+                selectClass(classes[index]);
+            }
+        }
+
+        function joinWithCode() {
+            var code = prompt('Enter the class invite code:');
+            if (!code) return;
+            
+            code = code.toUpperCase().trim();
+            
+            // Search through all classes to find matching code
+            db.ref('classes').once('value')
+                .then(function(snapshot) {
+                    var found = false;
+                    snapshot.forEach(function(childSnapshot) {
+                        var classData = childSnapshot.val();
+                        if (classData.info && classData.info.inviteCode === code) {
+                            found = true;
+                            // Add this class to user's classes
+                            db.ref('users/' + currentUser.id + '/classes/' + classData.info.id).set(classData.info)
+                                .then(function() {
+                                    alert('Successfully joined ' + classData.info.name + '!');
+                                })
+                                .catch(function(error) {
+                                    alert('Error joining class: ' + error.message);
+                                });
+                        }
+                    });
+                    
+                    if (!found) {
+                        alert('Invalid code. Please check and try again.');
+                    }
+                })
+                .catch(function(error) {
+                    alert('Error searching for class: ' + error.message);
+                });
         }
 
         function addDeadline(title, date, subject) {
@@ -406,19 +457,38 @@
         }
 
         function showCreateClassModal() {
+            console.log('Opening create class modal');
             var modal = document.getElementById('modal-overlay');
+            if (!modal) {
+                console.error('Modal overlay not found!');
+                return;
+            }
             modal.className = 'modal show';
             document.getElementById('modal-content').innerHTML =
                 '<h2 class="mb-2">Create New Class</h2>' +
-                '<input type="text" id="new-class-name" placeholder="Class Name (e.g., Math 3A)" class="input">' +
+                '<input type="text" id="new-class-name" placeholder="Class Name (e.g., Math 3A)" class="input" autofocus>' +
                 '<div class="flex gap-1">' +
                 '<button onclick="closeModals()" class="btn btn-secondary" style="flex: 1;">Cancel</button>' +
                 '<button onclick="submitCreateClass()" class="btn btn-primary" style="flex: 1;">Create</button>' +
                 '</div>';
+            
+            // Focus the input after a brief delay
+            setTimeout(function() {
+                var input = document.getElementById('new-class-name');
+                if (input) input.focus();
+            }, 100);
         }
 
         function submitCreateClass() {
-            var name = document.getElementById('new-class-name').value;
+            console.log('Submit create class called');
+            var nameInput = document.getElementById('new-class-name');
+            if (!nameInput) {
+                console.error('Name input not found');
+                alert('Error: Could not find class name input');
+                return;
+            }
+            var name = nameInput.value;
+            console.log('Class name:', name);
             createClass(name);
         }
 
@@ -761,8 +831,8 @@
                 classesHTML = '<div class="mt-2"><h2>Your Classes</h2><div class="grid grid-3 gap-2">';
                 for (var i = 0; i < classes.length; i++) {
                     var cls = classes[i];
-                    var clsJson = JSON.stringify(cls).replace(/"/g, '&quot;');
-                    classesHTML += '<button onclick="selectClass(\'' + clsJson + '\')" class="card">' +
+                    // Store index instead of trying to pass JSON string
+                    classesHTML += '<button onclick="selectClassByIndex(' + i + ')" class="card">' +
                         '<h3>' + cls.name + '</h3>' +
                         '<p class="text-sm text-gray-600 mt-1">Code: ' + cls.inviteCode + '</p>' +
                         '</button>';
@@ -782,7 +852,7 @@
                 '<h3>Create New Class</h3>' +
                 '<p class="text-sm text-gray-600 mt-1">Start a new class and invite students</p>' +
                 '</button>' +
-                '<button onclick="alert(\'Join with code feature coming soon!\')" class="card text-center">' +
+                '<button onclick="joinWithCode()" class="card text-center">' +
                 '<div style="font-size: 3rem; margin-bottom: 0.5rem;">✉️</div>' +
                 '<h3>Join with Code</h3>' +
                 '<p class="text-sm text-gray-600 mt-1">Enter an invite code to join a class</p>' +
