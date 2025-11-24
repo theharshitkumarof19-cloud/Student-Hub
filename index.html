@@ -3,22 +3,19 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Student Hub — Realtime Chat</title>
+<title>Student Hub — All-in-one (Option B)</title>
 <style>
-  :root{
-    --bg:#f3f6ff; --card:#fff; --indigo:#4F46E5; --muted:#6b7280;
-  }
-  *{box-sizing:border-box}
-  body{font-family:Inter,ui-sans-serif,system-ui,Roboto,Helvetica,Arial; margin:0; background:linear-gradient(135deg,#EBF4FF 0%,#E0E7FF 100%); min-height:100vh}
-  .app{max-width:1100px;margin:24px auto;padding:16px;display:grid;grid-template-columns:260px 1fr;gap:16px}
-  .card{background:var(--card);border-radius:12px;padding:12px;box-shadow:0 6px 18px rgba(15,23,42,0.06)}
-  .sidebar{display:flex;flex-direction:column;height:80vh}
+  :root{--indigo:#4F46E5;--bg:#F8FAFF;--muted:#6B7280}
+  *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;}
+  body{margin:0;background:linear-gradient(135deg,#EBF4FF 0%,#E0E7FF 100%);min-height:100vh}
+  .container{max-width:1100px;margin:24px auto;padding:16px;display:grid;grid-template-columns:260px 1fr;gap:16px}
+  .card{background:#fff;border-radius:12px;padding:12px;box-shadow:0 6px 18px rgba(15,23,42,0.06)}
+  .sidebar{display:flex;flex-direction:column;height:82vh}
   .logo{display:flex;align-items:center;gap:10px;padding:8px 0}
-  .avatar{width:38px;height:38px;border-radius:8px;background:var(--indigo);color:white;display:flex;align-items:center;justify-content:center;font-weight:700}
-  .small{font-size:13px;color:var(--muted)}
-  .btn{padding:8px 12px;border-radius:8px;border:0;cursor:pointer;font-weight:600}
+  .avatar{width:40px;height:40px;border-radius:8px;background:var(--indigo);color:white;display:flex;align-items:center;justify-content:center;font-weight:700}
+  .btn{padding:8px 12px;border-radius:8px;border:0;cursor:pointer;font-weight:700}
   .btn-primary{background:var(--indigo);color:white}
-  .btn-ghost{background:transparent;border:1px solid #e6e9f8;color:var(--indigo)}
+  .btn-ghost{background:transparent;border:1px solid rgba(79,70,229,0.12);color:var(--indigo)}
   .list{margin-top:8px;overflow:auto;padding-right:6px}
   .class-item{padding:10px;border-radius:8px;cursor:pointer;margin-bottom:8px}
   .class-item:hover{background:#f4f6ff}
@@ -26,92 +23,56 @@
   .channels{margin-top:12px}
   .channel{padding:8px;border-radius:8px;cursor:pointer}
   .channel.active{background:#eef2ff;color:var(--indigo);font-weight:700}
-  .main{display:flex;flex-direction:column;height:80vh}
+  .main{display:flex;flex-direction:column;height:82vh}
   .header{display:flex;align-items:center;justify-content:space-between;padding:8px 0}
   .chat-area{flex:1;padding:12px;overflow:auto;border-radius:10px;background:#fbfcff;border:1px solid #f1f5f9}
   .msg{display:flex;gap:10px;margin-bottom:12px}
-  .msg .bubble{background:white;padding:10px;border-radius:8px;box-shadow:0 3px 10px rgba(15,23,42,0.03);max-width:70%}
+  .msg .bubble{background:white;padding:10px;border-radius:8px;box-shadow:0 3px 10px rgba(15,23,42,0.03);max-width:72%}
   .msg.me{flex-direction:row-reverse}
   .msg.me .bubble{background:var(--indigo);color:white}
   .compose{display:flex;gap:8px;padding-top:10px}
-  input[type="text"], textarea{padding:10px;border-radius:8px;border:1px solid #e6e9f8;flex:1}
+  input[type="text"], textarea, input[type="date"], input[type="email"], input[type="password"]{
+    padding:10px;border-radius:8px;border:1px solid #e6e9f8;flex:1
+  }
   .muted{color:var(--muted);font-size:13px}
-  @media(max-width:900px){.app{grid-template-columns:1fr;}.sidebar{height:auto}}
+  .tabs{display:flex;gap:8px;margin-top:12px}
+  .tab-btn{padding:8px 10px;border-radius:8px;border:0;background:transparent;cursor:pointer}
+  .tab-btn.active{background:#eef2ff;color:var(--indigo);font-weight:700}
+  .card-scroll{overflow:auto;max-height:55vh}
+  .small{font-size:13px;color:var(--muted)}
+  .inline-btn{background:transparent;border:0;color:var(--indigo);cursor:pointer;font-weight:700}
+  .deadlines-list .deadline{border-left:4px solid #e6e9ff;padding:8px;border-radius:6px;margin-bottom:8px;background:#fff}
+  .post{padding:8px;border-radius:8px;background:#fff;margin-bottom:8px;border:1px solid #f1f5f9}
+  .reply{padding:6px;border-radius:6px;background:#f8fafc;margin-top:6px}
+  @media(max-width:980px){.container{grid-template-columns:1fr;}.sidebar{height:auto}}
 </style>
-<!-- Firebase compat (same as your original) -->
+<!-- Firebase compat libs -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
-<div class="app">
-  <!-- SIDEBAR -->
-  <div class="card sidebar" id="sidebar">
-    <div class="logo">
-      <div class="avatar">SH</div>
-      <div>
-        <div style="font-weight:700" id="user-name">Loading...</div>
-        <div class="small" id="user-email"></div>
-      </div>
-    </div>
-
-    <div style="margin-top:8px">
-      <button class="btn btn-primary" id="create-class-btn">+ Create Class</button>
-      <button class="btn btn-ghost" id="join-code-btn" style="margin-left:8px">Join</button>
-    </div>
-
-    <h4 style="margin-top:12px;margin-bottom:6px">Your Classes</h4>
-    <div class="list" id="classes-list" style="flex:0 1 200px"></div>
-
-    <h4 style="margin-top:10px;margin-bottom:6px">Channels</h4>
-    <div class="channels card" id="channels-list" style="flex:1;overflow:auto;padding:8px"></div>
-
-    <div style="margin-top:auto;padding-top:8px">
-      <div class="small" id="presence-info">No class selected</div>
-      <div style="margin-top:8px;display:flex;gap:8px">
-        <button class="btn btn-ghost" id="logout-btn">Logout</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MAIN -->
-  <div class="card main" id="main">
-    <div class="header">
-      <div>
-        <div style="font-weight:700" id="class-title">Select or create a class</div>
-        <div class="small" id="class-sub">Invite code: -</div>
-      </div>
-      <div class="small" id="online-count">Online: 0</div>
-    </div>
-
-    <div class="chat-area" id="chat-area">
-      <div class="muted" style="text-align:center;margin-top:20px">Join a class and select a channel to start chatting</div>
-    </div>
-
-    <div style="padding-top:8px">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <div id="typing-indicator" class="small muted" style="flex:1"></div>
-        <div class="small" id="last-seen"></div>
-      </div>
-
-      <div class="compose" style="margin-top:8px">
-        <input type="text" id="message-input" placeholder="Write a message..." disabled>
-        <button class="btn btn-primary" id="send-btn" disabled>Send</button>
-      </div>
+<div id="app">
+  <!-- initial loading card -->
+  <div style="min-height:80vh;display:flex;align-items:center;justify-content:center">
+    <div class="card text-center" style="max-width:420px">
+      <div style="width:48px;height:48px;border-radius:12px;background:var(--indigo);color:white;margin:0 auto;display:flex;align-items:center;justify-content:center;font-weight:700;">SH</div>
+      <h2 style="margin-top:12px">Student Hub</h2>
+      <p class="muted">Loading...</p>
     </div>
   </div>
 </div>
 
-<!-- Modal area (simple) -->
-<div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);align-items:center;justify-content:center">
-  <div style="background:white;padding:16px;border-radius:10px;min-width:300px;max-width:90%">
+<!-- modal (reused) -->
+<div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;z-index:1200">
+  <div style="background:white;padding:16px;border-radius:10px;width:min(720px,96%);max-height:90vh;overflow:auto">
     <div id="modal-body"></div>
-    <div style="margin-top:12px;text-align:right"><button id="modal-close" class="btn btn-ghost">Close</button></div>
+    <div style="text-align:right;margin-top:12px"><button id="modal-close" class="btn btn-ghost">Close</button></div>
   </div>
 </div>
 
 <script>
-/* ======= CONFIG - replace with your own or keep user's config ======= */
+/* ================= CONFIG ================= */
 const firebaseConfig = {
   apiKey: "AIzaSyCfijY0V4DQDOkrb13ludHiGRFtWsk8Bsg",
   authDomain: "student-hub-450ab.firebaseapp.com",
@@ -121,94 +82,598 @@ const firebaseConfig = {
   messagingSenderId: "149361370872",
   appId: "1:149361370872:web:e3ee75310e59d92f3bbd0d"
 };
-/* ================================================================== */
-
+/* ========================================= */
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-/* -------------------------
-   App state
-------------------------- */
+/* ================ STATE =================== */
 let currentUser = null;
-let classes = []; // array of class info for user
-let currentClass = null; // {id, name, inviteCode, ...}
-let channels = []; // channels in current class
-let currentChannel = null; // {id, name}
-let messagesRef = null;
-let presenceRef = null;
-let typingRef = null;
-let messageListener = null;
+let userClasses = []; // classes belonging to user
+let currentClass = null; // object {id,name,...}
+let classChannels = []; // channels in class
+let currentChannel = null; // {id,name}
+let channelMessagesRef = null;
+let channelMessagesListener = null;
+let classPresenceRef = null;
 let presenceListener = null;
+let typingRef = null;
+let groupsList = [];
+let groupMsgRef = null;
+let groupMsgListener = null;
 
-/* -------------------------
-   Helpers
-------------------------- */
+/* ================ HELPERS ================ */
 function $(id){return document.getElementById(id);}
 function showModal(html){
   $('modal-body').innerHTML = html;
   $('modal').style.display = 'flex';
 }
-$('modal-close').onclick = ()=> $('modal').style.display='none';
+function closeModal(){ $('modal').style.display = 'none'; }
+$('modal-close').onclick = closeModal;
 
 function escapeHtml(str){
   if(!str) return '';
-  return str.replace(/[&<>"'`]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[s]));
+  return String(str).replace(/[&<>"'`]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[s]));
 }
 
-/* -------------------------
-   UI rendering
-------------------------- */
+/* ============== RENDER VIEWS ============= */
 
-function renderUser(){
-  if(!currentUser){ $('user-name').textContent = 'Not signed in'; $('user-email').textContent=''; return; }
-  $('user-name').textContent = currentUser.name || currentUser.email.split('@')[0];
-  $('user-email').textContent = currentUser.email;
+/* main render — switches between auth view and app view (Option B) */
+function render(){
+  const target = $('app');
+  if(!currentUser){
+    target.innerHTML = renderAuthView();
+    attachAuthHandlers();
+  } else if(!currentClass){
+    target.innerHTML = renderClassSelection();
+    attachClassSelectionHandlers();
+    // load user's classes
+    loadUserClasses();
+  } else {
+    target.innerHTML = renderClassView();
+    attachClassViewHandlers();
+    // load channels, deadlines, posts, groups for class
+    loadClassData(currentClass.id);
+    setupPresence(currentClass.id);
+  }
 }
 
-function renderClasses(){
-  const container = $('classes-list');
-  container.innerHTML = '';
-  classes.forEach((c, i)=>{
+/* ---------- AUTH VIEW ---------- */
+function renderAuthView(){
+  return `
+    <div style="min-height:80vh;display:flex;align-items:center;justify-content:center;padding:12px">
+      <div class="card" style="max-width:720px;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="padding:18px;">
+          <h2>Welcome to Student Hub</h2>
+          <p class="small">Collaborate with your class — deadlines, homework help, realtime chat and groups.</p>
+          <div style="margin-top:12px">
+            <button id="show-login" class="btn btn-primary" style="width:100%;margin-bottom:8px">Login</button>
+            <button id="show-signup" class="btn btn-ghost" style="width:100%">Sign up</button>
+          </div>
+          <p class="small" style="margin-top:14px">Firebase project: <strong>${escapeHtml(firebaseConfig.projectId)}</strong></p>
+        </div>
+        <div style="padding:18px;border-left:1px solid #f1f5f9;">
+          <div id="auth-forms">
+            ${renderLoginForm()}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderLoginForm(){
+  return `
+    <h3>Login</h3>
+    <input id="login-email" type="email" placeholder="Email" style="width:100%;margin-top:8px" />
+    <input id="login-pass" type="password" placeholder="Password" style="width:100%;margin-top:8px" />
+    <div style="margin-top:12px;display:flex;gap:8px">
+      <button id="login-submit" class="btn btn-primary">Login</button>
+      <button id="login-demo" class="btn btn-ghost">Demo account</button>
+    </div>
+    <hr style="margin-top:12px"/>
+    ${renderSignupFormSmall()}
+  `;
+}
+
+function renderSignupFormSmall(){
+  return `
+    <h4 style="margin-top:6px">Sign up</h4>
+    <input id="signup-name" placeholder="Full name" style="width:100%;margin-top:8px" />
+    <input id="signup-email" type="email" placeholder="Email" style="width:100%;margin-top:8px" />
+    <input id="signup-pass" type="password" placeholder="Password (min 6)" style="width:100%;margin-top:8px" />
+    <div style="text-align:right;margin-top:8px">
+      <button id="signup-submit" class="btn btn-primary">Create account</button>
+    </div>
+  `;
+}
+
+function attachAuthHandlers(){
+  $('show-login').onclick = ()=> { $('auth-forms').innerHTML = renderLoginForm(); attachAuthHandlers(); };
+  $('show-signup').onclick = ()=> { $('auth-forms').innerHTML = renderSignupFormSmall(); attachAuthHandlers(); };
+
+  const loginSubmit = $('login-submit');
+  if(loginSubmit) loginSubmit.onclick = ()=>{
+    const email = $('login-email').value.trim();
+    const pass = $('login-pass').value;
+    if(!email||!pass) return alert('Fill email and password');
+    auth.signInWithEmailAndPassword(email, pass).catch(e=> alert(e.message));
+  };
+  const loginDemo = $('login-demo');
+  if(loginDemo) loginDemo.onclick = ()=>{
+    // demo credentials (optional) - quick creation
+    const demoEmail = 'demo_student@example.com';
+    const demoPass = 'password123';
+    auth.signInWithEmailAndPassword(demoEmail, demoPass).catch(e=>{
+      // try create demo account
+      auth.createUserWithEmailAndPassword(demoEmail, demoPass)
+        .then(userCred=> userCred.user.updateProfile({displayName:'Demo Student'}))
+        .then(()=> alert('Demo account created. Log in again.'))
+        .catch(err => alert(err.message));
+    });
+  };
+
+  const signupSubmit = $('signup-submit');
+  if(signupSubmit) signupSubmit.onclick = ()=>{
+    const name = $('signup-name').value.trim();
+    const email = $('signup-email').value.trim();
+    const pass = $('signup-pass').value;
+    if(!name||!email||!pass) return alert('Fill all fields');
+    if(pass.length < 6) return alert('Password must be at least 6 characters');
+    auth.createUserWithEmailAndPassword(email, pass)
+      .then(uc=> uc.user.updateProfile({displayName: name}))
+      .catch(e=> alert(e.message));
+  };
+}
+
+/* ---------- CLASS SELECTION VIEW ---------- */
+function renderClassSelection(){
+  return `
+    <div class="container">
+      <div class="card sidebar">
+        <div class="logo">
+          <div class="avatar">${escapeHtml((currentUser.displayName||currentUser.email).charAt(0).toUpperCase())}</div>
+          <div>
+            <div style="font-weight:700">${escapeHtml(currentUser.displayName || currentUser.email.split('@')[0])}</div>
+            <div class="small">${escapeHtml(currentUser.email)}</div>
+          </div>
+        </div>
+
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <button id="create-class" class="btn btn-primary" style="flex:1">+ Create Class</button>
+          <button id="join-class" class="btn btn-ghost" style="flex:1">Join</button>
+        </div>
+
+        <h4 style="margin-top:12px">Your classes</h4>
+        <div class="list" id="classes-list"></div>
+
+        <div style="margin-top:auto">
+          <div class="small" id="home-presence">Not in a class</div>
+          <div style="margin-top:8px"><button id="logout-btn" class="btn btn-ghost">Logout</button></div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:18px">
+        <h2>Welcome, ${escapeHtml(currentUser.displayName || currentUser.email.split('@')[0])}</h2>
+        <p class="small">Select a class or create a new one. Inside a class you get Deadlines, Homework, Channels (chat), and Groups with mini-chats.</p>
+        <div style="margin-top:16px" id="classes-preview">
+          <!-- optionally show class cards -->
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function attachClassSelectionHandlers(){
+  $('create-class').onclick = ()=> {
+    showModal(`
+      <h3>Create Class</h3>
+      <input id="modal-class-name" placeholder="Class name (e.g., Math 3A)" style="width:100%;padding:8px;border-radius:8px;border:1px solid #eee" />
+      <div style="text-align:right;margin-top:8px"><button id="modal-create-class" class="btn btn-primary">Create</button></div>
+    `);
+    $('modal-create-class').onclick = ()=>{
+      const name = $('modal-class-name').value.trim();
+      if(!name) return alert('Enter class name');
+      createClass(name);
+      closeModal();
+    };
+  };
+
+  $('join-class').onclick = ()=> {
+    const code = prompt('Enter invite code:');
+    if(!code) return;
+    joinWithCode(code);
+  };
+
+  $('logout-btn').onclick = ()=> auth.signOut();
+
+  renderUserClassesList();
+}
+
+function renderUserClassesList(){
+  const list = document.getElementById('classes-list');
+  if(!list) return;
+  list.innerHTML = '';
+  if(userClasses.length === 0){
+    list.innerHTML = '<div class="small">You have not joined any classes yet.</div>';
+    return;
+  }
+  userClasses.forEach((c, idx)=>{
     const el = document.createElement('div');
     el.className = 'class-item card';
-    if(currentClass && currentClass.id === c.id) el.classList.add('class-selected');
     el.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
       <div>
         <div style="font-weight:700">${escapeHtml(c.name)}</div>
         <div class="small">Code: ${escapeHtml(c.inviteCode || '')}</div>
       </div>
       <div style="text-align:right">
-        <div class="small">Members: —</div>
-        <div style="margin-top:8px"><button class="btn btn-ghost" onclick="event.stopPropagation(); copyCode('${escapeHtml(c.inviteCode)}')">Copy</button></div>
+        <button class="inline-btn" onclick="event.stopPropagation(); copyInvite('${escapeHtml(c.inviteCode)}')">Copy</button>
       </div>
     </div>`;
-    el.onclick = ()=> selectClassByIndex(i);
+    el.onclick = ()=> {
+      enterClass(c);
+    };
+    list.appendChild(el);
+  });
+}
+
+/* ---------- CLASS VIEW (tabs inside class) ---------- */
+function renderClassView(){
+  const classTitle = escapeHtml(currentClass.name);
+  const invite = escapeHtml(currentClass.inviteCode || '-');
+  return `
+    <div class="container">
+      <div class="card sidebar">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="avatar">${escapeHtml((currentUser.displayName||currentUser.email).charAt(0).toUpperCase())}</div>
+          <div>
+            <div style="font-weight:700">${classTitle}</div>
+            <div class="small">You: ${escapeHtml(currentUser.displayName || currentUser.email.split('@')[0])}</div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <div class="tabs" id="class-tabs">
+            <button class="tab-btn active" data-tab="deadlines">📅 Deadlines</button>
+            <button class="tab-btn" data-tab="homework">❓ Homework Help</button>
+            <button class="tab-btn" data-tab="channels">💬 Channels</button>
+            <button class="tab-btn" data-tab="groups">👥 Groups</button>
+          </div>
+        </div>
+
+        <div id="sidebar-actions" style="margin-top:12px">
+          <button id="invite-btn" class="btn btn-primary" style="width:100%">Invite (Code)</button>
+          <button id="back-classes" class="btn btn-ghost" style="width:100%;margin-top:8px">Back to classes</button>
+        </div>
+
+        <div style="margin-top:auto">
+          <div class="small" id="class-presence">Online: —</div>
+          <div style="margin-top:8px"><button id="leave-class" class="btn btn-ghost">Leave class</button></div>
+        </div>
+      </div>
+
+      <div class="card main card-scroll" style="padding:16px">
+        <div id="tab-deadlines" class="tab-content">
+          <h2>Deadlines</h2>
+          <div style="display:flex;gap:8px;margin-bottom:12px">
+            <input id="deadline-title" placeholder="Title" style="flex:1" />
+            <input id="deadline-date" type="date" />
+            <input id="deadline-subject" placeholder="Subject (optional)" style="width:160px" />
+            <button id="add-deadline" class="btn btn-primary">Add</button>
+          </div>
+          <div id="deadlines-list" class="deadlines-list"></div>
+        </div>
+
+        <div id="tab-homework" class="tab-content" style="display:none">
+          <h2>Homework Help</h2>
+          <div style="margin-bottom:12px" class="post">
+            <input id="post-title" placeholder="Question title" style="width:100%;margin-bottom:8px" />
+            <textarea id="post-desc" placeholder="Describe your question..." style="width:100%"></textarea>
+            <div style="text-align:right;margin-top:8px">
+              <button id="add-post" class="btn btn-primary">Post Question</button>
+            </div>
+          </div>
+          <div id="posts-list"></div>
+        </div>
+
+        <div id="tab-channels" class="tab-content" style="display:none">
+          <h2>Channels (class chat)</h2>
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <input id="channel-name" placeholder="New channel name" />
+            <button id="create-channel" class="btn btn-primary">Create</button>
+          </div>
+          <div style="display:flex;gap:12px">
+            <div style="width:240px">
+              <div id="channels-list" class="card card-scroll"></div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column">
+              <div id="channel-header" style="display:flex;justify-content:space-between;align-items:center">
+                <div><strong id="channel-title">Select a channel</strong><div class="small" id="channel-sub"></div></div>
+                <div class="small" id="channel-online">Online: —</div>
+              </div>
+              <div id="channel-messages" class="chat-area card-scroll" style="margin-top:8px"></div>
+              <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+                <input id="channel-input" placeholder="Message" />
+                <button id="channel-send" class="btn btn-primary">Send</button>
+              </div>
+              <div class="small muted" id="channel-typing"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-groups" class="tab-content" style="display:none">
+          <h2>Groups (project groups with mini-chat)</h2>
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <input id="group-name" placeholder="Group name" />
+            <input id="group-time" placeholder="Meeting time (optional)" />
+            <button id="create-group" class="btn btn-primary">Create Group</button>
+          </div>
+          <div id="groups-list"></div>
+
+          <hr/>
+          <div id="group-chat-area" style="display:none">
+            <h3 id="group-chat-title"></h3>
+            <div id="group-chat-messages" class="chat-area card-scroll"></div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <input id="group-chat-input" placeholder="Message" />
+              <button id="group-chat-send" class="btn btn-primary">Send</button>
+            </div>
+            <div class="small muted" id="group-typing"></div>
+            <div style="margin-top:8px"><button id="close-group-chat" class="btn btn-ghost">Close chat</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ============== DATA ACTIONS ================ */
+
+/* --- CREATE CLASS --- */
+function createClass(name){
+  const id = Date.now().toString();
+  const inviteCode = Math.random().toString(36).substring(2,8).toUpperCase();
+  const info = { id, name, inviteCode, createdBy: currentUser.uid, createdAt: Date.now() };
+  const updates = {};
+  updates[`/classes/${id}/info`] = info;
+  updates[`/users/${currentUser.uid}/classes/${id}`] = info;
+  db.ref().update(updates).catch(e=> alert(e.message));
+}
+
+/* --- JOIN WITH CODE --- */
+function joinWithCode(code){
+  if(!code) return;
+  db.ref('classes').orderByChild('info/inviteCode').equalTo(code).once('value')
+    .then(snap=>{
+      if(!snap.exists()) return alert('Invalid code');
+      snap.forEach(child=>{
+        const info = child.val().info;
+        db.ref(`users/${currentUser.uid}/classes/${info.id}`).set(info)
+          .then(()=> {
+            loadUserClasses();
+            alert('Joined ' + info.name);
+          })
+          .catch(e=> alert(e.message));
+      });
+    }).catch(e=> alert(e.message));
+}
+
+/* --- LOAD USER CLASSES --- */
+function loadUserClasses(){
+  const ref = db.ref(`users/${currentUser.uid}/classes`);
+  ref.off();
+  ref.on('value', snap=>{
+    const val = snap.val();
+    userClasses = val ? Object.values(val) : [];
+    // if on class selection page, render list
+    const listEl = document.getElementById('classes-list');
+    if(listEl) renderUserClassesList();
+  });
+}
+
+/* --- ENTER / SELECT CLASS --- */
+function enterClass(clsObj){
+  // clsObj may be object from list
+  currentClass = clsObj;
+  // render class view
+  render();
+}
+
+/* --- LEAVE CLASS (back to selection) --- */
+function leaveClass(){
+  // cleanup listeners
+  cleanupClassListeners();
+  currentClass = null;
+  render();
+}
+
+/* ============ CLASS DATA: channels, deadlines, posts, groups ============ */
+
+function loadClassData(classId){
+  // load deadlines
+  const deadlinesRef = db.ref(`classes/${classId}/deadlines`);
+  deadlinesRef.off();
+  deadlinesRef.on('value', snap=>{
+    const val = snap.val();
+    const arr = val ? Object.values(val).sort((a,b)=>a.createdAt - b.createdAt) : [];
+    renderDeadlines(arr);
+  });
+
+  // load homework posts
+  const postsRef = db.ref(`classes/${classId}/posts`);
+  postsRef.off();
+  postsRef.on('value', snap=>{
+    const val = snap.val();
+    const arr = val ? Object.values(val).sort((a,b)=>b.timestamp - a.timestamp) : [];
+    renderPosts(arr);
+  });
+
+  // load channels list
+  const channelsRef = db.ref(`classes/${classId}/channels`);
+  channelsRef.off();
+  channelsRef.on('value', snap=>{
+    const val = snap.val();
+    classChannels = val ? Object.values(val).map(x => x.info ? x.info : x) : [];
+    renderChannelsList();
+    // ensure general exists
+    if(!classChannels.find(c=>c.name==='general')){
+      db.ref(`classes/${classId}/channels/general/info`).set({id:'general', name:'general', createdAt:Date.now()}).catch(()=>{});
+      return;
+    }
+    // auto-select first channel if none selected
+    if(classChannels.length>0 && !currentChannel){
+      selectChannel(classChannels[0].id);
+    }
+  });
+
+  // load groups
+  const groupsRef = db.ref(`classes/${classId}/groups`);
+  groupsRef.off();
+  groupsRef.on('value', snap=>{
+    const val = snap.val();
+    groupsList = val ? Object.values(val) : [];
+    renderGroupsList();
+  });
+}
+
+/* ---------------- DEADLINES --------------- */
+function renderDeadlines(arr){
+  const container = document.getElementById('deadlines-list');
+  if(!container) return;
+  container.innerHTML = '';
+  if(arr.length === 0) { container.innerHTML = '<div class="small muted">No deadlines yet.</div>'; return; }
+  arr.forEach(d=>{
+    const el = document.createElement('div');
+    el.className = 'deadline';
+    el.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-weight:700">${escapeHtml(d.title)}</div>
+        <div class="small">${escapeHtml(d.subject||'')}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="small">Due: <strong>${escapeHtml(d.date)}</strong></div>
+        <div style="margin-top:8px">
+          <button class="inline-btn" onclick="editDeadline('${escapeHtml(d.id)}')">Edit</button>
+          <button class="inline-btn" onclick="deleteDeadline('${escapeHtml(d.id)}')">Delete</button>
+        </div>
+      </div>
+    </div>`;
     container.appendChild(el);
   });
 }
 
-function renderChannels(){
-  const container = $('channels-list');
-  container.innerHTML = '';
-  if(!currentClass) return;
-  // default channel
-  const addChannelBtn = document.createElement('div');
-  addChannelBtn.style.marginBottom='8px';
-  addChannelBtn.innerHTML = `<div style="display:flex;gap:8px;align-items:center">
-    <input id="new-channel-name" placeholder="New channel name" style="flex:1;padding:8px;border-radius:8px;border:1px solid #eef" />
-    <button class="btn btn-primary" id="create-channel-btn">Create</button>
-  </div>`;
-  container.appendChild(addChannelBtn);
-  $('create-channel-btn').onclick = ()=> {
-    const name = $('new-channel-name').value.trim();
-    if(!name) return alert('Enter channel name');
-    createChannel(name);
-  };
+function addDeadline(){
+  const t = $('deadline-title').value.trim();
+  const date = $('deadline-date').value;
+  const subj = $('deadline-subject').value.trim();
+  if(!t || !date) return alert('Fill title and date');
+  const id = Date.now().toString();
+  const payload = { id, title: t, date, subject: subj, createdBy: currentUser.uid, createdAt: Date.now() };
+  db.ref(`classes/${currentClass.id}/deadlines/${id}`).set(payload).then(()=> {
+    $('deadline-title').value=''; $('deadline-date').value=''; $('deadline-subject').value='';
+  }).catch(e=> alert(e.message));
+}
 
-  channels.forEach(ch => {
+function editDeadline(id){
+  const ref = db.ref(`classes/${currentClass.id}/deadlines/${id}`);
+  ref.once('value').then(snap=>{
+    const d = snap.val();
+    if(!d) return alert('Not found');
+    showModal(`
+      <h3>Edit deadline</h3>
+      <input id="edit-deadline-title" value="${escapeHtml(d.title)}" style="width:100%;margin-top:8px" />
+      <input id="edit-deadline-date" type="date" value="${escapeHtml(d.date)}" style="width:100%;margin-top:8px" />
+      <input id="edit-deadline-subj" value="${escapeHtml(d.subject||'')}" style="width:100%;margin-top:8px" />
+      <div style="text-align:right;margin-top:8px"><button id="save-deadline" class="btn btn-primary">Save</button></div>
+    `);
+    $('save-deadline').onclick = ()=>{
+      const title = $('edit-deadline-title').value.trim();
+      const date = $('edit-deadline-date').value;
+      const subj = $('edit-deadline-subj').value.trim();
+      if(!title||!date) return alert('Fill title and date');
+      db.ref(`classes/${currentClass.id}/deadlines/${id}`).update({title, date, subject:subj});
+      closeModal();
+    };
+  });
+}
+
+function deleteDeadline(id){
+  if(!confirm('Delete this deadline?')) return;
+  db.ref(`classes/${currentClass.id}/deadlines/${id}`).remove().catch(e=> alert(e.message));
+}
+
+/* ---------------- HOMEWORK (posts + replies) --------------- */
+function renderPosts(arr){
+  const container = document.getElementById('posts-list');
+  if(!container) return;
+  container.innerHTML = '';
+  if(arr.length === 0) { container.innerHTML = '<div class="small muted">No questions yet.</div>'; return; }
+  arr.forEach(p=>{
     const el = document.createElement('div');
-    el.className = 'channel';
+    el.className = 'post';
+    const desc = escapeHtml(p.description || '');
+    el.innerHTML = `<div style="display:flex;justify-content:space-between">
+      <div><strong>${escapeHtml(p.title)}</strong><div class="small">By ${escapeHtml(p.authorName || 'Unknown')}</div></div>
+      <div class="small">${new Date(p.timestamp).toLocaleString()}</div>
+    </div>
+    <div style="margin-top:8px">${desc}</div>
+    <div style="margin-top:8px" id="replies-${p.id}"></div>
+    <div style="margin-top:8px;display:flex;gap:8px">
+      <input id="reply-input-${p.id}" placeholder="Write a reply..." />
+      <button class="btn btn-primary" onclick="addReply('${escapeHtml(p.id)}')">Reply</button>
+    </div>
+    <div style="margin-top:8px"><button class="inline-btn" onclick="deletePost('${escapeHtml(p.id)}')">Delete post</button></div>`;
+    container.appendChild(el);
+    // load replies realtime
+    const rref = db.ref(`classes/${currentClass.id}/posts/${p.id}/replies`);
+    rref.off();
+    rref.on('value', snap=>{
+      const rv = snap.val();
+      const arrR = rv ? Object.values(rv).sort((a,b)=>a.timestamp-b.timestamp) : [];
+      const repEl = document.getElementById(`replies-${p.id}`);
+      if(repEl){
+        repEl.innerHTML = arrR.map(r=> `<div class="reply"><strong>${escapeHtml(r.authorName)}</strong><div class="small">${new Date(r.timestamp).toLocaleString()}</div><div style="margin-top:6px">${escapeHtml(r.text)}</div></div>` ).join('');
+      }
+    });
+  });
+}
+
+function addPost(){
+  const title = $('post-title').value.trim();
+  const desc = $('post-desc').value.trim();
+  if(!title) return alert('Enter a title');
+  const id = Date.now().toString();
+  const payload = { id, title, description: desc, authorId: currentUser.uid, authorName: currentUser.displayName || currentUser.email.split('@')[0], timestamp: Date.now() };
+  db.ref(`classes/${currentClass.id}/posts/${id}`).set(payload).then(()=> {
+    $('post-title').value=''; $('post-desc').value='';
+  }).catch(e=> alert(e.message));
+}
+
+function addReply(postId){
+  const input = $(`reply-input-${postId}`);
+  if(!input) return;
+  const text = input.value.trim();
+  if(!text) return alert('Enter reply');
+  const id = Date.now().toString() + '-' + Math.random().toString(36).slice(2,5);
+  const payload = { id, text, authorId: currentUser.uid, authorName: currentUser.displayName || currentUser.email.split('@')[0], timestamp: Date.now() };
+  db.ref(`classes/${currentClass.id}/posts/${postId}/replies/${id}`).set(payload).then(()=> {
+    input.value = '';
+  }).catch(e=> alert(e.message));
+}
+
+function deletePost(id){
+  if(!confirm('Delete this post?')) return;
+  db.ref(`classes/${currentClass.id}/posts/${id}`).remove().catch(e=> alert(e.message));
+}
+
+/* ---------------- CHANNELS (class chat) --------------- */
+function renderChannelsList(){
+  const container = document.getElementById('channels-list');
+  if(!container) return;
+  container.innerHTML = '';
+  classChannels.forEach(ch=>{
+    const el = document.createElement('div');
+    el.className = 'channel card';
     if(currentChannel && currentChannel.id === ch.id) el.classList.add('active');
     el.textContent = '# ' + ch.name;
     el.onclick = ()=> selectChannel(ch.id);
@@ -216,359 +681,342 @@ function renderChannels(){
   });
 }
 
-/* -------------------------
-   Auth
-------------------------- */
-
-function showLoginForm(){
-  showModal(`
-    <h3>Login</h3>
-    <input id="li-email" placeholder="Email" style="width:100%;padding:8px;border-radius:8px;border:1px solid #eee" /><br/><br/>
-    <input id="li-pass" type="password" placeholder="Password" style="width:100%;padding:8px;border-radius:8px;border:1px solid #eee" /><br/><br/>
-    <div style="text-align:right"><button id="li-submit" class="btn btn-primary">Login</button></div>
-    <div style="margin-top:8px"><small>Or create an account below</small></div>
-    <hr/>
-    <input id="su-name" placeholder="Full name" style="width:100%;padding:8px;border-radius:8px;border:1px solid #eee" /><br/><br/>
-    <input id="su-email" placeholder="Email" style="width:100%;padding:8px;border-radius:8px;border:1px solid #eee" /><br/><br/>
-    <input id="su-pass" type="password" placeholder="Password (min 6)" style="width:100%;padding:8px;border-radius:8px;border:1px solid #eee" /><br/><br/>
-    <div style="text-align:right"><button id="su-submit" class="btn btn-primary">Sign up</button></div>
-  `);
-  $('li-submit').onclick = ()=>{
-    const email = $('li-email').value.trim(), pass = $('li-pass').value;
-    if(!email||!pass) return alert('fill fields');
-    auth.signInWithEmailAndPassword(email, pass).then(()=> $('modal').style.display='none')
-      .catch(e=> alert(e.message));
-  };
-  $('su-submit').onclick = ()=>{
-    const name = $('su-name').value.trim(), email = $('su-email').value.trim(), pass = $('su-pass').value;
-    if(!name||!email||!pass) return alert('fill fields');
-    if(pass.length<6) return alert('password min 6');
-    auth.createUserWithEmailAndPassword(email, pass)
-      .then(uc=> uc.user.updateProfile({displayName:name}))
-      .then(()=> { $('modal').style.display='none'; alert('Account created.'); })
-      .catch(e=> alert(e.message));
-  };
-}
-
-/* -------------------------
-   Class actions
-------------------------- */
-
-function createClass(name){
-  const id = Date.now().toString();
-  const inviteCode = Math.random().toString(36).substring(2,8).toUpperCase();
-  const info = { id, name, inviteCode, createdBy: currentUser.uid, createdAt: Date.now() };
-  // Write in two places: classes/{id}/info and users/{uid}/classes/{id}
-  const updates = {};
-  updates[`/classes/${id}/info`] = info;
-  updates[`/users/${currentUser.uid}/classes/${id}`] = info;
-  db.ref().update(updates)
-    .then(()=> { loadUserClasses(); selectClassById(id); $('modal').style.display='none'; })
-    .catch(e=> alert(e.message));
-}
-
-function showCreateClass(){
-  showModal(`
-    <h3>Create Class</h3>
-    <input id="new-class-name-modal" placeholder="Class name (e.g., Math 3A)" style="width:100%;padding:8px;border-radius:8px;border:1px solid #eee" />
-    <div style="text-align:right;margin-top:8px"><button id="new-class-create" class="btn btn-primary">Create</button></div>
-  `);
-  $('new-class-create').onclick = ()=>{
-    const name = $('new-class-name-modal').value.trim();
-    if(!name) return alert('enter name');
-    createClass(name);
-  };
-}
-
-function copyCode(code){ navigator.clipboard.writeText(code||''); alert('Code copied'); }
-
-function joinClassWithCode(){
-  const code = prompt('Enter invite code:').toUpperCase().trim();
-  if(!code) return;
-  db.ref('classes').orderByChild('info/inviteCode').equalTo(code).once('value')
-    .then(snap=>{
-      if(!snap.exists()) return alert('Invalid code');
-      snap.forEach(child=>{
-        const info = child.val().info;
-        // add to user's classes
-        db.ref(`users/${currentUser.uid}/classes/${info.id}`).set(info)
-          .then(()=> { loadUserClasses(); alert('Joined ' + info.name); })
-          .catch(e=> alert(e.message));
-      });
-    }).catch(e=> alert(e.message));
-}
-
-/* -------------------------
-   Load classes for user
-------------------------- */
-function loadUserClasses(){
-  if(!currentUser) return;
-  const ref = db.ref(`users/${currentUser.uid}/classes`);
-  ref.off();
-  ref.on('value', snap=>{
-    const val = snap.val();
-    classes = val ? Object.values(val) : [];
-    renderClasses();
-  });
-}
-
-/* -------------------------
-   Select class
-   Avoid JSON.parse bugs -> always pass objects or ids
-------------------------- */
-
-function selectClassByIndex(i){
-  if(!classes[i]) return;
-  selectClass(classes[i]);
-}
-
-function selectClassById(id){
-  const cls = classes.find(c=>c.id===id);
-  if(cls) selectClass(cls);
-}
-
-/* IMPORTANT: accept either object or id, but do not JSON.parse blindly */
-function selectClass(cls){
-  // cls might be an object already
-  if(typeof cls === 'string'){ // if an id passed
-    const found = classes.find(c=>c.id===cls);
-    if(!found) return alert('Class not found');
-    cls = found;
-  }
-  currentClass = cls;
-  currentChannel = null;
-  channels = [];
-  // UI updates
-  $('class-title').textContent = currentClass.name;
-  $('class-sub').textContent = 'Invite code: ' + (currentClass.inviteCode || '-');
-  $('message-input').disabled = true;
-  $('send-btn').disabled = true;
-  renderClasses();
-  // load channels & class data
-  loadChannelsForClass(currentClass.id);
-  setupPresence(currentClass.id);
-  // load channels → will auto-select default channel when available
-}
-
-/* -------------------------
-   Channels & Messages
-------------------------- */
-
-function loadChannelsForClass(classId){
-  const ref = db.ref(`classes/${classId}/channels`);
-  ref.off();
-  ref.on('value', snap=>{
-    const val = snap.val();
-    channels = val ? Object.values(val).map(c => c.info ? c.info : c) : [];
-    // ensure there's a default general channel
-    if(!channels.find(ch=>ch.name==='general')){
-      const chId = 'general';
-      const info = { id: chId, name:'general', createdAt: Date.now() };
-      db.ref(`classes/${classId}/channels/${chId}/info`).set(info).catch(()=>{});
-      // channels will be picked up by the ref listener shortly
-      return;
-    }
-    renderChannels();
-    // auto-select first channel if none selected
-    if(!currentChannel && channels.length>0){
-      selectChannel(channels[0].id);
-    } else {
-      renderChannels();
-    }
-  });
-}
-
-function createChannel(name){
+function createChannel(){
+  const name = $('channel-name').value.trim();
+  if(!name) return alert('Enter channel name');
   const chId = name.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-_]/g,'') + '-' + Date.now().toString().slice(-4);
-  const info = { id: chId, name, createdAt: Date.now(), createdBy: currentUser.uid };
-  db.ref(`classes/${currentClass.id}/channels/${chId}/info`).set(info)
-    .then(()=> {
-      $('new-channel-name').value = '';
-      // listener will update channels
-    })
-    .catch(e=> alert(e.message));
+  const info = { id: chId, name, createdBy: currentUser.uid, createdAt: Date.now() };
+  db.ref(`classes/${currentClass.id}/channels/${chId}/info`).set(info).then(()=> {
+    $('channel-name').value='';
+  }).catch(e=> alert(e.message));
 }
 
 function selectChannel(channelId){
-  // stop previous listeners
-  if(messageListener && messagesRef) messagesRef.off('value', messageListener);
+  // cleanup old listeners
+  if(channelMessagesRef && channelMessagesListener) channelMessagesRef.off('value', channelMessagesListener);
   if(typingRef) typingRef.child(currentChannel ? currentChannel.id : '').child(currentUser.uid).remove().catch(()=>{});
-  currentChannel = channels.find(c => c.id === channelId);
-  renderChannels();
-  // enable input
-  $('message-input').disabled = false;
-  $('send-btn').disabled = false;
-  // load messages
-  messagesRef = db.ref(`classes/${currentClass.id}/channels/${currentChannel.id}/messages`);
-  messageListener = messagesRef.orderByChild('timestamp').limitToLast(200).on('value', snap=>{
-    const val = snap.val();
-    const msgs = val ? Object.values(val).sort((a,b)=>a.timestamp-b.timestamp) : [];
-    renderMessages(msgs);
-  });
-  // listen for typing
-  typingRef = db.ref(`typing/${currentClass.id}/${currentChannel.id}`);
-  typingRef.on('value', s=>{
-    const t = s.val() || {};
-    const typingUsers = Object.keys(t).filter(uid => t[uid] && uid !== currentUser.uid);
-    $('typing-indicator').textContent = typingUsers.length ? `${typingUsers.length} typing...` : '';
-  });
+  currentChannel = classChannels.find(c=>c.id===channelId);
+  // update header
+  if(currentChannel){
+    $('channel-title').textContent = '# ' + currentChannel.name;
+    $('channel-sub').textContent = '';
+    // enable send
+    $('channel-input').disabled = false;
+    $('channel-send').disabled = false;
+    // set messages ref
+    channelMessagesRef = db.ref(`classes/${currentClass.id}/channels/${currentChannel.id}/messages`);
+    channelMessagesListener = channelMessagesRef.orderByChild('timestamp').limitToLast(200).on('value', snap=>{
+      const val = snap.val();
+      const arr = val ? Object.values(val).sort((a,b)=>a.timestamp-b.timestamp) : [];
+      renderChannelMessages(arr);
+    });
+    // typing indicator
+    typingRef = db.ref(`typing/${currentClass.id}/${currentChannel.id}`);
+    typingRef.on('value', s=>{
+      const t = s.val() || {};
+      const typingUsers = Object.keys(t).filter(uid => t[uid] && uid !== currentUser.uid);
+      $('channel-typing').textContent = typingUsers.length ? `${typingUsers.length} typing...` : '';
+    });
+    // presence in channel based on class presence
+    // (we already show class presence)
+  } else {
+    $('channel-title').textContent = 'Select a channel';
+    $('channel-input').disabled = true;
+    $('channel-send').disabled = true;
+    $('channel-messages').innerHTML = '';
+  }
 }
 
-/* -------------------------
-   Messages UI
-------------------------- */
-
-function renderMessages(msgs){
-  const area = $('chat-area');
+function renderChannelMessages(arr){
+  const area = document.getElementById('channel-messages');
   area.innerHTML = '';
-  if(msgs.length===0){
-    area.innerHTML = '<div class="muted" style="text-align:center;margin-top:20px">No messages yet — say hi 👋</div>';
-  } else {
-    msgs.forEach(m=>{
-      const el = document.createElement('div');
-      el.className = 'msg' + (m.authorId === currentUser.uid ? ' me' : '');
-      const avatar = document.createElement('div');
-      avatar.style.minWidth='44px';
-      avatar.style.textAlign='center';
-      avatar.innerHTML = `<div style="width:36px;height:36px;border-radius:8px;background:#eef2ff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:var(--indigo)">${escapeHtml((m.authorName||'U').charAt(0).toUpperCase())}</div>`;
-      const bubble = document.createElement('div');
-      bubble.className = 'bubble';
-      bubble.innerHTML = `<div style="font-size:13px;font-weight:700">${escapeHtml(m.authorName||'Unknown')}</div>
-        <div style="margin-top:6px">${escapeHtml(m.text)}</div>
-        <div class="small muted" style="margin-top:6px">${new Date(m.timestamp).toLocaleString()}</div>`;
-      el.appendChild(avatar);
-      el.appendChild(bubble);
-      area.appendChild(el);
-    });
-  }
-  // scroll to bottom
+  if(arr.length===0){ area.innerHTML = '<div class="small muted" style="text-align:center">No messages yet</div>'; return; }
+  arr.forEach(m=>{
+    const el = document.createElement('div');
+    el.className = 'msg' + (m.authorId === currentUser.uid ? ' me' : '');
+    const avatar = document.createElement('div');
+    avatar.style.minWidth='44px';
+    avatar.style.textAlign='center';
+    avatar.innerHTML = `<div style="width:36px;height:36px;border-radius:8px;background:#eef2ff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:var(--indigo)">${escapeHtml((m.authorName||'U').charAt(0).toUpperCase())}</div>`;
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.innerHTML = `<div style="font-size:13px;font-weight:700">${escapeHtml(m.authorName||'Unknown')}</div><div style="margin-top:6px">${escapeHtml(m.text)}</div><div class="small muted" style="margin-top:6px">${new Date(m.timestamp).toLocaleString()}</div>`;
+    el.appendChild(avatar);
+    el.appendChild(bubble);
+    area.appendChild(el);
+  });
   area.scrollTop = area.scrollHeight;
 }
 
-/* -------------------------
-   Send message + typing
-------------------------- */
-
-$('send-btn').onclick = sendMessage;
-$('message-input').addEventListener('keydown', (e)=>{
-  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
-  // Typing indicator: set true, then debounce to false after interval
-  setTyping(true);
-  if(window._typingTimeout) clearTimeout(window._typingTimeout);
-  window._typingTimeout = setTimeout(()=> setTyping(false), 1500);
-});
-
-function sendMessage(){
-  const text = $('message-input').value.trim();
-  if(!text || !currentClass || !currentChannel) return;
-  const id = Date.now().toString() + '-' + Math.random().toString(36).slice(2,6);
-  const msg = {
-    id,
-    authorId: currentUser.uid,
-    authorName: currentUser.displayName || currentUser.email.split('@')[0],
-    text,
-    timestamp: Date.now()
-  };
-  const ref = db.ref(`classes/${currentClass.id}/channels/${currentChannel.id}/messages/${id}`);
-  ref.set(msg)
-    .then(()=> {
-      $('message-input').value = '';
-      setTyping(false);
-    }).catch(e=> alert(e.message));
+function sendChannelMessage(){
+  const text = $('channel-input').value.trim();
+  if(!text || !currentChannel) return;
+  const id = Date.now().toString() + '-' + Math.random().toString(36).slice(2,5);
+  const payload = { id, authorId: currentUser.uid, authorName: currentUser.displayName || currentUser.email.split('@')[0], text, timestamp: Date.now() };
+  db.ref(`classes/${currentClass.id}/channels/${currentChannel.id}/messages/${id}`).set(payload).then(()=> {
+    $('channel-input').value='';
+    setChannelTyping(false);
+  }).catch(e=> alert(e.message));
 }
 
-function setTyping(state){
+function setChannelTyping(state){
   if(!currentClass || !currentChannel) return;
   const ref = db.ref(`typing/${currentClass.id}/${currentChannel.id}/${currentUser.uid}`);
-  if(state){
-    ref.set(true);
-  } else {
-    ref.remove().catch(()=>{});
-  }
+  if(state) ref.set(true); else ref.remove().catch(()=>{});
 }
 
-/* -------------------------
-   Presence (who's online)
-------------------------- */
-
-function setupPresence(classId){
-  // clear previous presence listeners
-  if(presenceListener && presenceRef) presenceRef.off('value', presenceListener);
-  presenceRef = db.ref(`presence/${classId}`);
-  const userPresenceRef = db.ref(`presence/${classId}/${currentUser.uid}`);
-  // set presence true while window open, set lastSeen on disconnect
-  userPresenceRef.set({ name: currentUser.displayName || currentUser.email.split('@')[0], online: true, lastSeen: Date.now() });
-  userPresenceRef.onDisconnect().set({ name: currentUser.displayName || currentUser.email.split('@')[0], online: false, lastSeen: Date.now() });
-  presenceListener = presenceRef.on('value', snap=>{
-    const val = snap.val() || {};
-    const online = Object.values(val).filter(p=>p && p.online).length;
-    $('online-count').textContent = `Online: ${online}`;
-    // show who is online in presence-info
-    const onlineNames = Object.values(val).filter(p=>p && p.online).map(p=>p.name);
-    $('presence-info').textContent = onlineNames.length ? 'Online: ' + onlineNames.join(', ') : 'No one online';
+/* -------------- GROUPS & MINI CHAT --------------- */
+function renderGroupsList(){
+  const container = document.getElementById('groups-list');
+  if(!container) return;
+  container.innerHTML = '';
+  if(groupsList.length === 0){ container.innerHTML = '<div class="small muted">No groups yet</div>'; return; }
+  groupsList.forEach(g=>{
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-weight:700">${escapeHtml(g.name)}</div>
+        <div class="small">Created by: ${escapeHtml(g.creatorName || 'Unknown')} • ${escapeHtml(g.time || '')}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+        <button class="inline-btn" onclick="openGroupChat('${escapeHtml(g.id)}')">Open Chat</button>
+        ${g.creatorId === currentUser.uid ? `<button class="inline-btn" onclick="deleteGroup('${escapeHtml(g.id)}')">Delete</button>` : ''}
+      </div>
+    </div>`;
+    container.appendChild(el);
   });
 }
 
-/* -------------------------
-   Auth state handlers
-------------------------- */
+function createGroup(){
+  const name = $('group-name').value.trim();
+  const time = $('group-time').value.trim();
+  if(!name) return alert('Enter group name');
+  const id = Date.now().toString();
+  const payload = { id, name, time, creatorId: currentUser.uid, creatorName: currentUser.displayName || currentUser.email.split('@')[0], createdAt: Date.now() };
+  db.ref(`classes/${currentClass.id}/groups/${id}`).set(payload).then(()=> {
+    $('group-name').value=''; $('group-time').value='';
+  }).catch(e=> alert(e.message));
+}
 
+function deleteGroup(id){
+  if(!confirm('Delete this group?')) return;
+  db.ref(`classes/${currentClass.id}/groups/${id}`).remove().catch(e=> alert(e.message));
+}
+
+function openGroupChat(groupId){
+  // cleanup previous group listeners
+  if(groupMsgRef && groupMsgListener) groupMsgRef.off('value', groupMsgListener);
+  const g = groupsList.find(x=>x.id===groupId);
+  if(!g) return alert('Group not found');
+  // show UI
+  document.getElementById('group-chat-area').style.display = 'block';
+  document.getElementById('group-chat-title').textContent = `${g.name} • ${g.time || ''}`;
+  // set messages ref
+  groupMsgRef = db.ref(`classes/${currentClass.id}/groups/${groupId}/messages`);
+  groupMsgListener = groupMsgRef.orderByChild('timestamp').limitToLast(200).on('value', snap=>{
+    const val = snap.val();
+    const arr = val ? Object.values(val).sort((a,b)=>a.timestamp-b.timestamp) : [];
+    renderGroupMessages(arr);
+  });
+  // typing
+  const groupTypingRef = db.ref(`typing/${currentClass.id}/groups/${groupId}`);
+  groupTypingRef.on('value', s=>{
+    const t = s.val() || {};
+    const typingUsers = Object.keys(t).filter(uid => t[uid] && uid !== currentUser.uid);
+    $('group-typing').textContent = typingUsers.length ? `${typingUsers.length} typing...` : '';
+  });
+  // store id on element
+  document.getElementById('group-chat-area').dataset.groupId = groupId;
+}
+
+function closeGroupChat(){
+  if(groupMsgRef && groupMsgListener) groupMsgRef.off('value', groupMsgListener);
+  document.getElementById('group-chat-area').style.display = 'none';
+  document.getElementById('group-chat-messages').innerHTML = '';
+  document.getElementById('group-chat-area').dataset.groupId = '';
+  // remove typing state
+  const gid = document.getElementById('group-chat-area').dataset.groupId;
+  if(gid) db.ref(`typing/${currentClass.id}/groups/${gid}/${currentUser.uid}`).remove().catch(()=>{});
+}
+
+function renderGroupMessages(arr){
+  const area = document.getElementById('group-chat-messages');
+  area.innerHTML = '';
+  if(arr.length === 0){ area.innerHTML = '<div class="small muted" style="text-align:center">No messages yet</div>'; return; }
+  arr.forEach(m=>{
+    const el = document.createElement('div');
+    el.className = 'msg' + (m.authorId === currentUser.uid ? ' me' : '');
+    const avatar = document.createElement('div');
+    avatar.style.minWidth='44px';
+    avatar.style.textAlign='center';
+    avatar.innerHTML = `<div style="width:36px;height:36px;border-radius:8px;background:#eef2ff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:var(--indigo)">${escapeHtml((m.authorName||'U').charAt(0).toUpperCase())}</div>`;
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.innerHTML = `<div style="font-size:13px;font-weight:700">${escapeHtml(m.authorName||'Unknown')}</div><div style="margin-top:6px">${escapeHtml(m.text)}</div><div class="small muted" style="margin-top:6px">${new Date(m.timestamp).toLocaleString()}</div>`;
+    el.appendChild(avatar);
+    el.appendChild(bubble);
+    area.appendChild(el);
+  });
+  area.scrollTop = area.scrollHeight;
+}
+
+function sendGroupMessage(){
+  const gid = document.getElementById('group-chat-area').dataset.groupId;
+  if(!gid) return;
+  const text = $('group-chat-input').value.trim();
+  if(!text) return;
+  const id = Date.now().toString() + '-' + Math.random().toString(36).slice(2,5);
+  const payload = { id, authorId: currentUser.uid, authorName: currentUser.displayName || currentUser.email.split('@')[0], text, timestamp: Date.now() };
+  db.ref(`classes/${currentClass.id}/groups/${gid}/messages/${id}`).set(payload).then(()=> {
+    $('group-chat-input').value='';
+    db.ref(`typing/${currentClass.id}/groups/${gid}/${currentUser.uid}`).remove().catch(()=>{});
+  }).catch(e=> alert(e.message));
+}
+
+function setGroupTyping(state){
+  const gid = document.getElementById('group-chat-area').dataset.groupId;
+  if(!gid) return;
+  const ref = db.ref(`typing/${currentClass.id}/groups/${gid}/${currentUser.uid}`);
+  if(state) ref.set(true); else ref.remove().catch(()=>{});
+}
+
+/* ------------- PRESENCE (class) -------------- */
+function setupPresence(classId){
+  // cleanup prior
+  if(presenceListener && classPresenceRef) classPresenceRef.off('value', presenceListener);
+  classPresenceRef = db.ref(`presence/${classId}`);
+  const meRef = db.ref(`presence/${classId}/${currentUser.uid}`);
+  meRef.set({ name: currentUser.displayName || currentUser.email.split('@')[0], online: true, lastSeen: Date.now() });
+  meRef.onDisconnect().set({ name: currentUser.displayName || currentUser.email.split('@')[0], online:false, lastSeen: Date.now() });
+  presenceListener = classPresenceRef.on('value', snap=>{
+    const val = snap.val() || {};
+    const onlineNames = Object.values(val).filter(p=>p && p.online).map(p=>p.name);
+    const onlineCount = onlineNames.length;
+    const el = document.getElementById('class-presence');
+    if(el) el.textContent = onlineNames.length ? `Online: ${onlineNames.join(', ')}` : 'No one online';
+    const mainPresence = document.getElementById('home-presence');
+    if(mainPresence) mainPresence.textContent = onlineNames.length ? `Online: ${onlineNames.join(', ')}` : 'No one online';
+    // channel online count can reuse this
+    const channelOnline = document.getElementById('channel-online');
+    if(channelOnline) channelOnline.textContent = `Online: ${onlineCount}`;
+  });
+}
+
+/* ------------ CLEANUP LISTENERS ------------- */
+function cleanupClassListeners(){
+  // remove typing for current channel
+  if(typingRef && currentChannel) typingRef.child(currentChannel.id).child(currentUser.uid).remove().catch(()=>{});
+  // remove channel message listener
+  if(channelMessagesRef && channelMessagesListener) channelMessagesRef.off('value', channelMessagesListener);
+  if(classPresenceRef && presenceListener) classPresenceRef.off('value', presenceListener);
+  if(groupMsgRef && groupMsgListener) groupMsgRef.off('value', groupMsgListener);
+  // reset variables
+  currentChannel = null;
+  channelMessagesRef = null;
+  channelMessagesListener = null;
+  typingRef = null;
+  groupMsgRef = null;
+  groupMsgListener = null;
+}
+
+/* ============== EVENT ATTACHERS ============== */
+function attachClassViewHandlers(){
+  // tab switching
+  document.querySelectorAll('.tab-btn').forEach(b =>{
+    b.onclick = ()=> {
+      document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      const tab = b.dataset.tab;
+      document.querySelectorAll('.tab-content').forEach(c=> c.style.display = 'none');
+      document.getElementById('tab-' + tab).style.display = 'block';
+    };
+  });
+
+  // back to classes
+  $('back-classes').onclick = ()=> { leaveClass(); };
+
+  // invite
+  $('invite-btn').onclick = ()=> {
+    alert('Invite code: ' + (currentClass.inviteCode || '—'));
+  };
+
+  // add deadline
+  $('add-deadline').onclick = addDeadline;
+
+  // posts
+  $('add-post').onclick = addPost;
+
+  // channels
+  $('create-channel').onclick = createChannel;
+  $('channel-send').onclick = sendChannelMessage;
+  $('channel-input').addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendChannelMessage(); }
+    setChannelTyping(true);
+    if(window._channelTypingTimeout) clearTimeout(window._channelTypingTimeout);
+    window._channelTypingTimeout = setTimeout(()=> setChannelTyping(false), 1200);
+  });
+
+  // groups
+  $('create-group').onclick = createGroup;
+  $('group-chat-send').onclick = sendGroupMessage;
+  $('group-chat-input').addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendGroupMessage(); }
+    setGroupTyping(true);
+    if(window._groupTypingTimeout) clearTimeout(window._groupTypingTimeout);
+    window._groupTypingTimeout = setTimeout(()=> setGroupTyping(false), 1200);
+  });
+  $('close-group-chat').onclick = closeGroupChat;
+
+  // leave class
+  $('leave-class').onclick = ()=>{
+    if(confirm('Leave class? This will remove it from your classes list.')) {
+      db.ref(`users/${currentUser.uid}/classes/${currentClass.id}`).remove().then(()=>{
+        leaveClass();
+      }).catch(e=> alert(e.message));
+    }
+  };
+}
+
+/* =============== UTILITIES =============== */
+function copyInvite(code){ navigator.clipboard.writeText(code||''); alert('Code copied'); }
+
+/* =============== INITIAL AUTH STATE =============== */
 auth.onAuthStateChanged(user=>{
   if(user){
     currentUser = user;
-    renderUser();
+    // ensure users/{uid}/profile exists (optional)
+    db.ref(`users/${currentUser.uid}/profile`).update({ name: currentUser.displayName || '', email: currentUser.email }).catch(()=>{});
+    // load classes
     loadUserClasses();
-    // if newly signed up and no classes, optionally create demo
+    render();
   } else {
     currentUser = null;
-    // show login prompt
-    renderUser();
-    classes = [];
+    userClasses = [];
     currentClass = null;
-    channels = [];
-    currentChannel = null;
-    renderClasses();
-    $('class-title').textContent = 'Please login';
-    $('chat-area').innerHTML = '<div class="muted" style="text-align:center;margin-top:20px">Not signed in</div>';
+    render();
   }
 });
 
-/* -------------------------
-   Load user into UI
-------------------------- */
-
-function renderInitial(){
-  // wire buttons
-  $('create-class-btn').onclick = showCreateClass;
-  $('join-code-btn').onclick = joinClassWithCode;
-  $('logout-btn').onclick = ()=> auth.signOut();
-  $('send-btn').disabled = true;
-  $('message-input').disabled = true;
+/* =============== BIND UI ACTIONS when on class selection =============== */
+function attachClassSelectionHandlers(){
+  // render list
+  renderUserClassesList();
+  // buttons already bound in attachClassSelectionHandlers() earlier
 }
 
-renderInitial();
-
-/* -------------------------
-   Utility: load classes snapshot once on start (if signed in)
-------------------------- */
-
-function loadUserClassesOnce(){
-  if(!currentUser) return;
-  db.ref(`users/${currentUser.uid}/classes`).once('value').then(snap=>{
-    const v = snap.val();
-    classes = v ? Object.values(v) : [];
-    renderClasses();
-  });
-}
-
-// Expose some functions for debug / simple UI
-window.selectClassByIndex = selectClassByIndex;
-window.copyCode = copyCode;
-window.selectClassById = selectClassById;
-
-/* ---- Safety note: optionally load classes if page loaded and already logged in ---- */
-setTimeout(()=>{ if(auth.currentUser){ currentUser = auth.currentUser; renderUser(); loadUserClasses(); } }, 500);
+/* =============== LOAD once on script start =============== */
+setTimeout(()=> {
+  if(auth.currentUser){
+    currentUser = auth.currentUser;
+    loadUserClasses();
+    render();
+  } else {
+    render();
+  }
+}, 300);
 
 </script>
+
 </body>
 </html>
