@@ -628,6 +628,22 @@
             var password = document.getElementById('signup-password').value;
             handleSignup(name, email, password);
         }
+        
+        // Make all UI functions globally accessible
+        window.submitSignup = submitSignup;
+        window.showLogin = showLogin;
+        window.showSignup = showSignup;
+        window.showCreateClassModal = showCreateClassModal;
+        window.submitCreateClass = submitCreateClass;
+        window.showInviteModal = showInviteModal;
+        window.copyInviteCode = copyInviteCode;
+        window.closeModals = closeModals;
+        window.showTab = showTab;
+        window.submitDeadline = submitDeadline;
+        window.submitPost = submitPost;
+        window.submitGroup = submitGroup;
+        window.handleLogout = handleLogout;
+        window.selectClass = selectClass;
 
         function showCreateClassModal() {
             var modal = document.getElementById('modal-overlay');
