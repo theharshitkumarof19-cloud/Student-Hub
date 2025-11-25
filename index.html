@@ -722,8 +722,8 @@
             render();
         }
 
-        function selectClass(clsString) {
-            currentClass = JSON.parse(clsString);
+        function selectClass(cls) {
+            currentClass = cls; // cls is already an object
             currentTab = 'deadlines';
             loadClassData(currentClass.id);
             render();
