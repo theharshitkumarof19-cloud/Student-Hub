@@ -23,7 +23,7 @@ button.secondary { background:#e5e7eb; color:#111; }
 <div id="app">Loading…</div>
 
 <script>
-// 🔹 VERY SIMPLE LEGACY VERSION — THIS ONE IS HARD TO BREAK
+// 🔹 LEGACY WORKING VERSION WITH GUEST OPTION
 
 const firebaseConfig = {
   apiKey: "AIzaSyCfijY0V4DQDOkrb13ludHiGRFtWsk8Bsg",
@@ -41,21 +41,61 @@ const db = firebase.database();
 
 let user = null;
 
+// Render login + signup + guest
 function renderLogin() {
   document.getElementById('app').innerHTML = `
     <h2>Student Hub</h2>
+
     <input id="email" placeholder="Email">
     <input id="password" type="password" placeholder="Password">
     <button onclick="login()">Login</button>
-    <button class="secondary" onclick="guest()">Continue as Guest</button>
+    <button class="secondary" onclick="signup()">Sign Up</button>
+
+    <hr style="margin:1rem 0;">
+
+    <input id="guest-name" placeholder="Enter your name to join as guest">
+    <button class="secondary" onclick="guestJoin()">Continue as Guest</button>
   `;
 }
 
+// Login function
+function login() {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  auth.signInWithEmailAndPassword(email, password)
+    .catch(err => alert(err.message));
+}
+
+// Sign up function
+function signup() {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const displayName = email.split('@')[0];
+
+  auth.createUserWithEmailAndPassword(email, password)
+    .then(cred => cred.user.updateProfile({ displayName }))
+    .catch(err => alert(err.message));
+}
+
+// Guest join function
+function guestJoin() {
+  const name = document.getElementById('guest-name').value.trim();
+  if (!name) return alert('Please enter a name');
+  user = { uid: 'guest-' + Date.now(), name };
+  renderChat();
+}
+
+// Logout
+function logout() {
+  auth.signOut();
+}
+
+// Render chat
 function renderChat() {
   document.getElementById('app').innerHTML = `
     <h2>General Chat</h2>
     <div class="chat-box" id="chat"></div>
-    <input id="msg" placeholder="Type message…">
+    <input id="msg" placeholder="Type message…" onkeypress="if(event.key==='Enter') sendMsg()">
     <button onclick="sendMsg()">Send</button>
     <button class="secondary" onclick="logout()">Logout</button>
   `;
@@ -65,37 +105,28 @@ function renderChat() {
     const div = document.createElement('div');
     div.className = 'msg';
     div.innerHTML = `<span>${m.name}:</span> ${m.text}`;
-    document.getElementById('chat').appendChild(div);
+    const chatBox = document.getElementById('chat');
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight; // scroll to bottom
   });
 }
 
-function login() {
-  auth.signInWithEmailAndPassword(
-    document.getElementById('email').value,
-    document.getElementById('password').value
-  );
-}
-
-function guest() {
-  user = { uid: 'guest-' + Date.now(), name: 'Guest' };
-  renderChat();
-}
-
-function logout() {
-  auth.signOut();
-}
-
+// Send message
 function sendMsg() {
-  const text = document.getElementById('msg').value;
+  const textInput = document.getElementById('msg');
+  const text = textInput.value.trim();
   if (!text) return;
+
   db.ref('chat').push({
-    name: user.displayName || user.name || 'Guest',
+    name: user.displayName || user.name || (user.email ? user.email.split('@')[0] : 'Guest'),
     text,
     time: Date.now()
   });
-  document.getElementById('msg').value = '';
+  textInput.value = '';
+  textInput.focus();
 }
 
+// Auth state listener
 auth.onAuthStateChanged(u => {
   if (u) {
     user = u;
