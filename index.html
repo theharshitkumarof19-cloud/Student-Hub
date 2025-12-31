@@ -1,140 +1,211 @@
-<!-- … Keep your <head> and CSS exactly the same … -->
-
-<body>
-<div id="app">
-    <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center;">
-        <div class="card text-center">
-            <div style="width: 3rem; height: 3rem; border: 4px solid #4F46E5; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
-            <p class="text-gray-600">Loading...</p>
-        </div>
-    </div>
-</div>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Hub - Collaborate & Study</title>
 <style>
-@keyframes spin { to { transform: rotate(360deg); } }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: Arial, sans-serif; background: #f5f7ff; min-height: 100vh; }
+#app { max-width: 900px; margin: 2rem auto; background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,.1); }
+input, button { padding: .6rem; margin: .25rem 0; width: 100%; }
+button { border: none; border-radius: 4px; cursor: pointer; }
+button.primary { background: #4f46e5; color: #fff; }
+button.secondary { background: #e5e7eb; color: #111; }
+.chat-box { border: 1px solid #ddd; height: 300px; overflow-y: auto; padding: .5rem; margin-bottom: .5rem; }
+.msg { margin-bottom: .25rem; }
+.msg span { font-weight: bold; }
 </style>
 
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+<div id="app">Loading…</div>
+
 <script>
-// Globals
+// 🔹 Globals
 let auth, db;
 let currentUser = null;
-let currentClass = null;
 let classes = [];
-let deadlines = [];
-let posts = [];
-let groups = [];
+let currentClass = null;
 let chatMessages = [];
-let currentTab = 'deadlines';
 
-// Firebase init
+// 🔹 Firebase Config
 const firebaseConfig = {
-    apiKey: "AIzaSyCfijY0V4DQDOkrb13ludHiGRFtWsk8Bsg",
-    authDomain: "student-hub-450ab.firebaseapp.com",
-    databaseURL: "https://student-hub-450ab-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "student-hub-450ab",
-    storageBucket: "student-hub-450ab.firebasestorage.app",
-    messagingSenderId: "149361370872",
-    appId: "1:149361370872:web:e3ee75310e59d92f3bbd0d"
+  apiKey: "AIzaSyCfijY0V4DQDOkrb13ludHiGRFtWsk8Bsg",
+  authDomain: "student-hub-450ab.firebaseapp.com",
+  databaseURL: "https://student-hub-450ab-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "student-hub-450ab",
+  storageBucket: "student-hub-450ab.firebasestorage.app",
+  messagingSenderId: "149361370872",
+  appId: "1:149361370872:web:e3ee75310e59d92f3bbd0d"
 };
 
-// Initialize Firebase
+// 🔹 Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 auth = firebase.auth();
 db = firebase.database();
 
-// Guest Login Function
-function handleGuestLogin() {
-    const name = document.getElementById('guest-name').value.trim();
-    if (!name) { alert('Please enter a name'); return; }
-    currentUser = { id: 'guest-' + Date.now(), name: name };
-    render();
+// 🔹 Render functions
+function renderLogin() {
+  document.getElementById('app').innerHTML = `
+    <h2>Student Hub</h2>
+    <input id="login-email" placeholder="Email">
+    <input id="login-password" type="password" placeholder="Password">
+    <button class="primary" onclick="login()">Login</button>
+    <button class="secondary" onclick="signup()">Sign Up</button>
+    <button class="secondary" onclick="guest()">Continue as Guest</button>
+  `;
 }
 
-// UI: Login / Signup / Guest toggles
-function showLogin() { toggleTabs('login'); }
-function showSignup() { toggleTabs('signup'); }
-function showGuest() { toggleTabs('guest'); }
-
-function toggleTabs(tab) {
-    document.getElementById('login-tab').className = tab==='login' ? 'btn btn-primary' : 'btn btn-secondary';
-    document.getElementById('signup-tab').className = tab==='signup' ? 'btn btn-primary' : 'btn btn-secondary';
-    document.getElementById('guest-tab').className = tab==='guest' ? 'btn btn-primary' : 'btn btn-secondary';
-    document.getElementById('login-form').style.display = tab==='login' ? 'block':'none';
-    document.getElementById('signup-form').style.display = tab==='signup' ? 'block':'none';
-    document.getElementById('guest-form').style.display = tab==='guest' ? 'block':'none';
+function renderClassSelection() {
+  let html = `<h2>Welcome, ${currentUser.name}!</h2>`;
+  html += `<button onclick="createClassPrompt()">Create Class</button>`;
+  html += `<button onclick="joinClassPrompt()">Join Class</button>`;
+  if (classes.length > 0) {
+    html += `<h3>Your Classes</h3>`;
+    classes.forEach((cls, i) => {
+      html += `<button onclick="selectClassByIndex(${i})">${cls.name} (Code: ${cls.inviteCode || ''})</button>`;
+    });
+  }
+  html += `<button onclick="logout()">Logout</button>`;
+  document.getElementById('app').innerHTML = html;
 }
 
-// Render Login Page
-function renderLogin(){
-    return `
-    <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:1rem;">
-        <div class="card" style="max-width:28rem; width:100%;">
-            <div class="text-center mb-4">
-                <div class="icon-circle">📚</div>
-                <h1 style="margin-bottom:0.5rem;">Student Hub</h1>
-                <p class="text-gray-600">Collaborate, study, and succeed together</p>
-            </div>
-            <div class="flex gap-1 mb-2">
-                <button onclick="showLogin()" id="login-tab" class="btn btn-primary" style="flex:1;">Login</button>
-                <button onclick="showSignup()" id="signup-tab" class="btn btn-secondary" style="flex:1;">Sign Up</button>
-                <button onclick="showGuest()" id="guest-tab" class="btn btn-secondary" style="flex:1;">Guest</button>
-            </div>
-            <div id="login-form">
-                <input type="email" id="login-email" placeholder="Email" class="input">
-                <input type="password" id="login-password" placeholder="Password" class="input">
-                <button onclick="submitLogin()" class="btn btn-primary" style="width:100%;">Login</button>
-            </div>
-            <div id="signup-form" style="display:none;">
-                <input type="text" id="signup-name" placeholder="Full Name" class="input">
-                <input type="email" id="signup-email" placeholder="Email" class="input">
-                <input type="password" id="signup-password" placeholder="Password" class="input">
-                <button onclick="submitSignup()" class="btn btn-primary" style="width:100%;">Sign Up</button>
-            </div>
-            <div id="guest-form" style="display:none;">
-                <input type="text" id="guest-name" placeholder="Enter your name" class="input">
-                <button onclick="handleGuestLogin()" class="btn btn-primary" style="width:100%;">Continue as Guest</button>
-            </div>
-            <p class="text-sm text-gray-600 text-center mt-2">🔥 Powered by Firebase</p>
-        </div>
-    </div>
-    `;
+function renderChat() {
+  if (!currentClass) return renderClassSelection();
+  let html = `<h2>${currentClass.name} - General Chat</h2>`;
+  html += `<div class="chat-box" id="chat"></div>`;
+  html += `<input id="msg" placeholder="Type message...">`;
+  html += `<button onclick="sendMsg()">Send</button>`;
+  html += `<button onclick="backToClasses()">Back to Classes</button>`;
+  document.getElementById('app').innerHTML = html;
+
+  // Load chat messages
+  if (currentUser.guest) {
+    // guest messages stored locally
+    updateChatBox();
+  } else {
+    db.ref('classes/' + currentClass.id + '/chat').on('child_added', snap => {
+      chatMessages.push(snap.val());
+      updateChatBox();
+    });
+  }
 }
 
-// Auth Wrappers
-function submitLogin() {
-    const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
-    auth.signInWithEmailAndPassword(email,password).catch(err=>alert(err.message));
-}
-function submitSignup() {
-    const name = document.getElementById('signup-name').value;
-    const email = document.getElementById('signup-email').value;
-    const password = document.getElementById('signup-password').value;
-    auth.createUserWithEmailAndPassword(email,password)
-        .then(cred => cred.user.updateProfile({displayName:name}))
-        .catch(err=>alert(err.message));
-}
-function handleLogout() { currentUser=null; currentClass=null; classes=[]; deadlines=[]; posts=[]; groups=[]; chatMessages=[]; render(); }
-
-// Main Render Function
-function render(){
-    const app = document.getElementById('app');
-    if(!currentUser) app.innerHTML = renderLogin();
-    else if(!currentClass) app.innerHTML = renderClassSelection();
-    else app.innerHTML = renderMainApp();
+function updateChatBox() {
+  const chatDiv = document.getElementById('chat');
+  if (!chatDiv) return;
+  chatDiv.innerHTML = '';
+  chatMessages.forEach(m => {
+    const div = document.createElement('div');
+    div.className = 'msg';
+    div.innerHTML = `<span>${m.name}:</span> ${m.text}`;
+    chatDiv.appendChild(div);
+  });
+  chatDiv.scrollTop = chatDiv.scrollHeight;
 }
 
-// Initial Firebase Auth Listener
-auth.onAuthStateChanged(user=>{
-    if(user){
-        currentUser={id:user.uid, email:user.email, name:user.displayName||user.email.split('@')[0]};
-        loadUserClasses();
-    } else {
-        currentUser=null; render();
-    }
-});
+// 🔹 Auth functions
+function login() {
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+  auth.signInWithEmailAndPassword(email, password)
+    .then(userCred => {
+      currentUser = { id: userCred.user.uid, name: userCred.user.displayName || email };
+      loadUserClasses();
+    })
+    .catch(err => alert(err.message));
+}
 
-// ----- Keep all other functions (loadUserClasses, loadClassData, renderClassSelection, renderMainApp, etc.) exactly the same as your current code -----
+function signup() {
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+  const name = prompt("Enter your name:");
+  if (!name) return;
+  auth.createUserWithEmailAndPassword(email, password)
+    .then(userCred => {
+      userCred.user.updateProfile({ displayName: name });
+      currentUser = { id: userCred.user.uid, name };
+      loadUserClasses();
+    })
+    .catch(err => alert(err.message));
+}
+
+function guest() {
+  const name = prompt("Enter your name to continue as Guest:");
+  if (!name) return;
+  currentUser = { id: 'guest-' + Date.now(), name, guest: true };
+  classes = [];
+  renderClassSelection();
+}
+
+function logout() {
+  if (!currentUser.guest) auth.signOut();
+  currentUser = null;
+  currentClass = null;
+  classes = [];
+  chatMessages = [];
+  renderLogin();
+}
+
+// 🔹 Class functions
+function createClassPrompt() {
+  const name = prompt("Enter class name:");
+  if (!name) return;
+  const newClass = { id: Date.now().toString(), name, inviteCode: Math.random().toString(36).substring(2, 8).toUpperCase() };
+  classes.push(newClass);
+  if (!currentUser.guest) db.ref('users/' + currentUser.id + '/classes/' + newClass.id).set(newClass);
+  selectClass(newClass);
+}
+
+function joinClassPrompt() {
+  const code = prompt("Enter class invite code:");
+  if (!code) return alert("Joining by code is currently only local for guests.");
+}
+
+function selectClass(cls) {
+  currentClass = cls;
+  chatMessages = [];
+  renderChat();
+}
+
+function selectClassByIndex(i) {
+  if (classes[i]) selectClass(classes[i]);
+}
+
+function backToClasses() {
+  currentClass = null;
+  renderClassSelection();
+}
+
+// 🔹 Chat
+function sendMsg() {
+  const msgInput = document.getElementById('msg');
+  const text = msgInput.value.trim();
+  if (!text) return;
+  const msg = { name: currentUser.name, text, timestamp: Date.now() };
+  if (currentUser.guest) chatMessages.push(msg);
+  else db.ref('classes/' + currentClass.id + '/chat').push(msg);
+  msgInput.value = '';
+  updateChatBox();
+}
+
+// 🔹 Load classes for user
+function loadUserClasses() {
+  if (currentUser.guest) return renderClassSelection();
+  db.ref('users/' + currentUser.id + '/classes').once('value').then(snap => {
+    classes = snap.val() ? Object.values(snap.val()) : [];
+    renderClassSelection();
+  });
+}
+
+// 🔹 Init
+window.onload = () => {
+  renderLogin();
+};
 </script>
 </body>
 </html>
